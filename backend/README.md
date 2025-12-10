@@ -83,7 +83,16 @@ All API endpoints will be prefixed with `/api`
 - `POST /api/auth/login` - Login user
 - `GET /api/auth/profile` - Get user profile (protected)
 
+### Employee Management Endpoints
+- `GET /api/employees` - List employees (with pagination & filters)
+- `GET /api/employees/:id` - Get employee by ID
+- `POST /api/employees` - Create new employee (Admin/HR only)
+- `PUT /api/employees/:id` - Update employee (Admin/HR only)
+- `DELETE /api/employees/:id` - Delete employee (Admin/HR only)
+
 **For detailed API documentation, see [API_DOCUMENTATION.md](./API_DOCUMENTATION.md)**
+
+**For employee management guide, see [EMPLOYEE_MANAGEMENT_GUIDE.md](./EMPLOYEE_MANAGEMENT_GUIDE.md)**
 
 **For Postman collection, import [POSTMAN_COLLECTION.json](./POSTMAN_COLLECTION.json)**
 

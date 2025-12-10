@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { User } from '../models/User';
+import { Employee } from '../models/Employee';
 import { generateTokens } from '../utils/jwt';
 import { ApiResponse } from '../types';
 import { AuthenticatedRequest } from '../middleware/auth';
@@ -9,7 +10,7 @@ import { AuthenticatedRequest } from '../middleware/auth';
  */
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, username, password, firstName, lastName, role } = req.body;
+    const { email, username, password, firstName, lastName, role, employeeId } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({
@@ -29,6 +30,33 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // If employeeId is provided, validate and link
+    let employee = null;
+    if (employeeId) {
+      employee = await Employee.findById(employeeId);
+      
+      if (!employee) {
+        const response: ApiResponse = {
+          status: 400,
+          success: false,
+          message: 'Employee not found',
+        };
+        res.status(400).json(response);
+        return;
+      }
+
+      // Check if employee already has a user account
+      if (employee.user) {
+        const response: ApiResponse = {
+          status: 400,
+          success: false,
+          message: 'Employee already has a user account',
+        };
+        res.status(400).json(response);
+        return;
+      }
+    }
+
     // Create new user
     const user = new User({
       email,
@@ -37,9 +65,16 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       firstName,
       lastName,
       role: role || 'employee',
+      employee: employeeId || null, // Optional link
     });
 
     await user.save();
+
+    // If employee was linked, update employee with user reference
+    if (employee && employeeId) {
+      employee.user = user._id;
+      await employee.save();
+    }
 
     // Generate tokens
     const tokens = generateTokens({
@@ -61,6 +96,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
           firstName: user.firstName,
           lastName: user.lastName,
           role: user.role,
+          employee: user.employee || null,
         },
         ...tokens,
       },
@@ -165,9 +201,16 @@ export const getProfile = async (
   res: Response
 ): Promise<void> => {
   try {
-    const user = await User.findById(req.user?.userId).select(
-      '-password'
-    );
+    const user = await User.findById(req.user?.userId)
+      .select('-password')
+      .populate({
+        path: 'employee',
+        select: 'employeeId designation department address documents',
+        populate: {
+          path: 'department',
+          select: 'name description',
+        },
+      });
 
     if (!user) {
       const response: ApiResponse = {

@@ -15,7 +15,7 @@ Each entry follows this format:
 
 ---
 
-## 2024-12-19 - Project Initialization
+## 2025-12-10 - Project Initialization
 
 ### Type: Setup
 ### Module: General
@@ -53,7 +53,19 @@ Each entry follows this format:
 
 ## Change History
 
-### [2024-12-19] - API Documentation Created
+### [2025-12-10] - Employee Management Implementation
+- ✅ Created Department Mongoose model
+- ✅ Created Employee Mongoose model with all required fields
+- ✅ Created employee validation schemas with Zod
+- ✅ Created employee controller with full CRUD operations
+- ✅ Implemented pagination and filtering for employee list
+- ✅ Added role-based access control (Admin/HR only for create/update/delete)
+- ✅ Created employee routes with authentication
+- ✅ Added employee endpoints to API documentation
+- ✅ Implemented soft delete functionality
+- ✅ Added department validation on employee creation/update
+
+### [2025-12-10] - API Documentation Created
 - ✅ Created comprehensive API documentation (API_DOCUMENTATION.md)
 - ✅ Created Postman collection file (POSTMAN_COLLECTION.json)
 - ✅ Documented all authentication endpoints with examples
@@ -62,7 +74,7 @@ Each entry follows this format:
 - ✅ Added Postman setup instructions
 - ✅ Updated backend README with documentation links
 
-### [2024-12-19] - Replaced Joi with Zod Validation
+### [2025-12-10] - Replaced Joi with Zod Validation
 - ✅ Replaced Joi with Zod for validation
 - ✅ Updated auth validation schemas to use Zod
 - ✅ Updated validate middleware to work with Zod
@@ -70,7 +82,7 @@ Each entry follows this format:
 - ✅ Fixed TypeScript errors in middleware
 - ✅ Removed Joi dependency, added Zod
 
-### [2024-12-19] - Authentication System Implementation
+### [2025-12-10] - Authentication System Implementation
 - ✅ Created User Mongoose model with password hashing
 - ✅ Created JWT utility functions (generate, verify tokens)
 - ✅ Created authentication middleware (authenticateToken, requireRole)
@@ -86,19 +98,19 @@ Each entry follows this format:
 - ✅ Added automatic token management (localStorage)
 - ✅ Added protected route handling
 
-### [2024-12-19] - Vite Port Configuration
+### [2025-12-10] - Vite Port Configuration
 - ✅ Changed Vite dev server to use default port 5173 (instead of 3000)
 - ✅ Updated all documentation to reflect default Vite port
 - ✅ Updated CORS configuration to allow port 5173
 - 📝 Note: Vite's default port is 5173, avoiding conflicts with other apps on port 3000
 
-### [2024-12-19] - Package Installation Fix
+### [2025-12-10] - Package Installation Fix
 - 🐛 Fixed `@types/classnames` version error in package.json
 - ✅ Removed `@types/classnames` (classnames v2.5.1 has built-in TypeScript types)
 - ✅ Successfully installed all frontend dependencies
 - ✅ Frontend ready for development
 
-### [2024-12-19] - Project Initialization & Setup
+### [2025-12-10] - Project Initialization & Setup
 - ✅ Created complete ERMS project folder structure
 - ✅ Initialized backend with Express + TypeScript + MongoDB
 - ✅ Initialized frontend with React + TypeScript + Tailwind CSS
@@ -175,9 +187,32 @@ When making changes, add an entry at the top of the "Change History" section:
 
 ---
 
+## 2025-12-10 - User-Employee Relationship Implementation
+
+### Type: Feature
+### Module: Backend
+### Description: Implemented optional bidirectional relationship between User and Employee models
+### Files Changed:
+- ✅ Updated `backend/src/models/User.ts` - Added optional `employee` field referencing Employee model
+- ✅ Updated `backend/src/models/Employee.ts` - Added optional `user` field referencing User model, added index
+- ✅ Updated `backend/src/validation/authValidation.ts` - Made `employeeId` optional in registration schema
+- ✅ Updated `backend/src/controllers/authController.ts` - Modified `register` to optionally link employee, updated `getProfile` to populate employee data
+- ✅ Updated `backend/src/controllers/employeeController.ts` - Added user linking/unlinking logic in `updateEmployee`, populated user data in list/get operations
+- ✅ Updated `backend/src/validation/employeeValidation.ts` - Added optional `userId` field for linking users to employees
+### Author: System
+### Notes:
+- Users can exist without being linked to an employee (for system admins, external users, etc.)
+- Employees can exist without user accounts (for employees who don't need system access)
+- When linking: validates employee exists, not already linked, and updates both sides of relationship
+- When unlinking: removes references from both User and Employee models
+- All employee queries now populate user data when available
+- User profile endpoint now includes employee information when linked
+
+---
+
 ## Statistics
 
-- **Total Changes**: 1
-- **Last Updated**: 2024-12-19
-- **Current Phase**: Phase 1 - Foundation
+- **Total Changes**: 8
+- **Last Updated**: 2025-12-10
+- **Current Phase**: Phase 2 - Core Features
 

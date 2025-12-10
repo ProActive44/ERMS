@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import authRoutes from './authRoutes';
+import employeeRoutes from './employeeRoutes';
 
 const router = Router();
 
@@ -11,9 +12,11 @@ router.get('/health', (req, res) => {
 // Authentication routes
 router.use('/auth', authRoutes);
 
+// Employee routes
+router.use('/employees', employeeRoutes);
+
 // API routes will be added here
 // Example:
-// router.use('/employees', employeeRoutes);
 // router.use('/attendance', attendanceRoutes);
 // router.use('/leaves', leaveRoutes);
 // router.use('/projects', projectRoutes);

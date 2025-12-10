@@ -8,6 +8,7 @@ export interface IUser extends Document {
   firstName: string;
   lastName: string;
   role: 'admin' | 'hr' | 'employee';
+  employee?: mongoose.Types.ObjectId; // Optional - user might not be an employee
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -51,6 +52,12 @@ const UserSchema = new Schema<IUser>(
       enum: ['admin', 'hr', 'employee'],
       default: 'employee',
       required: true,
+    },
+    employee: {
+      type: Schema.Types.ObjectId,
+      ref: 'Employee',
+      default: null, // Optional - user might not be linked to an employee
+      index: true,
     },
     isActive: {
       type: Boolean,

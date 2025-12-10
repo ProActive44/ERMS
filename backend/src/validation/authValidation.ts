@@ -19,6 +19,7 @@ export const registerSchema = z.object({
     .min(1, 'Last name is required')
     .max(50, 'Last name must not exceed 50 characters'),
   role: z.enum(['admin', 'hr', 'employee']).default('employee').optional(),
+  employeeId: z.string().optional(), // Optional - user can exist without employee
 });
 
 export const loginSchema = z.object({

@@ -412,6 +412,387 @@ if (pm.response.code === 200) {
 
 ---
 
+---
+
+## Employee Management Endpoints
+
+### 1. Get Employee List
+
+Get a paginated list of employees with optional filters.
+
+**Endpoint:** `GET /api/employees`
+
+**Authentication:** Required (Bearer Token)
+
+**Query Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| page | number | No | Page number (default: 1) |
+| limit | number | No | Items per page (default: 10) |
+| search | string | No | Search in name, email, employeeId, mobileNumber |
+| department | string | No | Filter by department ID |
+| isActive | boolean | No | Filter by active status (true/false) |
+| designation | string | No | Filter by designation |
+
+**Success Response (200 OK):**
+```json
+{
+  "status": 200,
+  "success": true,
+  "message": "Employees retrieved successfully",
+  "data": {
+    "employees": [
+      {
+        "_id": "507f1f77bcf86cd799439011",
+        "employeeId": "EMP001",
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "john.doe@example.com",
+        "mobileNumber": "+1234567890",
+        "designation": "Software Engineer",
+        "department": {
+          "_id": "507f1f77bcf86cd799439012",
+          "name": "IT",
+          "description": "Information Technology"
+        },
+        "address": "123 Main St",
+        "documents": [],
+        "isActive": true,
+        "createdAt": "2024-12-19T10:00:00.000Z",
+        "updatedAt": "2024-12-19T10:00:00.000Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 10,
+      "total": 1,
+      "pages": 1
+    }
+  }
+}
+```
+
+**Postman Example:**
+```
+GET http://localhost:8000/api/employees?page=1&limit=10&search=john
+Authorization: Bearer {{accessToken}}
+```
+
+---
+
+### 2. Get Employee by ID
+
+Get a single employee's details by ID.
+
+**Endpoint:** `GET /api/employees/:id`
+
+**Authentication:** Required (Bearer Token)
+
+**URL Parameters:**
+- `id` - Employee MongoDB ID
+
+**Success Response (200 OK):**
+```json
+{
+  "status": 200,
+  "success": true,
+  "message": "Employee retrieved successfully",
+  "data": {
+    "_id": "507f1f77bcf86cd799439011",
+    "employeeId": "EMP001",
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@example.com",
+    "mobileNumber": "+1234567890",
+    "designation": "Software Engineer",
+    "department": {
+      "_id": "507f1f77bcf86cd799439012",
+      "name": "IT",
+      "description": "Information Technology"
+    },
+    "address": "123 Main St",
+    "documents": [],
+    "isActive": true,
+    "createdAt": "2024-12-19T10:00:00.000Z",
+    "updatedAt": "2024-12-19T10:00:00.000Z"
+  }
+}
+```
+
+**Error Response (404 Not Found):**
+```json
+{
+  "status": 404,
+  "success": false,
+  "message": "Employee not found"
+}
+```
+
+**Postman Example:**
+```
+GET http://localhost:8000/api/employees/507f1f77bcf86cd799439011
+Authorization: Bearer {{accessToken}}
+```
+
+---
+
+### 3. Create Employee
+
+Create a new employee record.
+
+**Endpoint:** `POST /api/employees`
+
+**Authentication:** Required (Bearer Token)
+
+**Authorization:** Admin or HR only
+
+**Request Body:**
+```json
+{
+  "employeeId": "EMP001",
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "mobileNumber": "+1234567890",
+  "designation": "Software Engineer",
+  "department": "507f1f77bcf86cd799439012",
+  "address": "123 Main St",
+  "documents": [
+    {
+      "type": "id_proof",
+      "url": "https://example.com/docs/id.pdf"
+    }
+  ],
+  "isActive": true
+}
+```
+
+**Request Parameters:**
+
+| Field | Type | Required | Description | Validation |
+|-------|------|----------|-------------|------------|
+| employeeId | string | Yes | Unique employee identifier | Required, unique |
+| firstName | string | Yes | Employee's first name | 1-50 characters |
+| lastName | string | Yes | Employee's last name | 1-50 characters |
+| email | string | Yes | Employee email | Valid email, unique |
+| mobileNumber | string | Yes | Mobile phone number | 10-15 digits, unique |
+| designation | string | Yes | Job designation | Required |
+| department | string | Yes | Department MongoDB ID | Must exist |
+| address | string | No | Employee address | Max 500 characters |
+| documents | array | No | Employee documents | Array of document objects |
+| isActive | boolean | No | Active status | Default: true |
+
+**Success Response (201 Created):**
+```json
+{
+  "status": 201,
+  "success": true,
+  "message": "Employee created successfully",
+  "data": {
+    "_id": "507f1f77bcf86cd799439011",
+    "employeeId": "EMP001",
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@example.com",
+    "mobileNumber": "+1234567890",
+    "designation": "Software Engineer",
+    "department": {
+      "_id": "507f1f77bcf86cd799439012",
+      "name": "IT",
+      "description": "Information Technology"
+    },
+    "address": "123 Main St",
+    "documents": [],
+    "isActive": true,
+    "createdAt": "2024-12-19T10:00:00.000Z",
+    "updatedAt": "2024-12-19T10:00:00.000Z"
+  }
+}
+```
+
+**Error Responses:**
+
+**400 Bad Request - Validation Error:**
+```json
+{
+  "status": 400,
+  "success": false,
+  "message": "Validation error",
+  "error": [
+    "email: Please provide a valid email address",
+    "mobileNumber: Mobile number must be at least 10 digits"
+  ]
+}
+```
+
+**400 Bad Request - Duplicate Entry:**
+```json
+{
+  "status": 400,
+  "success": false,
+  "message": "Email already registered"
+}
+```
+
+**400 Bad Request - Department Not Found:**
+```json
+{
+  "status": 400,
+  "success": false,
+  "message": "Department not found"
+}
+```
+
+**403 Forbidden:**
+```json
+{
+  "status": 403,
+  "success": false,
+  "message": "Insufficient permissions"
+}
+```
+
+**Postman Example:**
+```
+POST http://localhost:8000/api/employees
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "employeeId": "EMP001",
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "mobileNumber": "+1234567890",
+  "designation": "Software Engineer",
+  "department": "507f1f77bcf86cd799439012",
+  "address": "123 Main St"
+}
+```
+
+---
+
+### 4. Update Employee
+
+Update an existing employee record.
+
+**Endpoint:** `PUT /api/employees/:id`
+
+**Authentication:** Required (Bearer Token)
+
+**Authorization:** Admin or HR only
+
+**URL Parameters:**
+- `id` - Employee MongoDB ID
+
+**Request Body:** (All fields optional)
+```json
+{
+  "firstName": "Jane",
+  "designation": "Senior Software Engineer",
+  "address": "456 Oak Ave"
+}
+```
+
+**Success Response (200 OK):**
+```json
+{
+  "status": 200,
+  "success": true,
+  "message": "Employee updated successfully",
+  "data": {
+    "_id": "507f1f77bcf86cd799439011",
+    "employeeId": "EMP001",
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "email": "john.doe@example.com",
+    "mobileNumber": "+1234567890",
+    "designation": "Senior Software Engineer",
+    "department": {
+      "_id": "507f1f77bcf86cd799439012",
+      "name": "IT"
+    },
+    "address": "456 Oak Ave",
+    "isActive": true,
+    "updatedAt": "2024-12-19T11:00:00.000Z"
+  }
+}
+```
+
+**Error Responses:**
+
+**404 Not Found:**
+```json
+{
+  "status": 404,
+  "success": false,
+  "message": "Employee not found"
+}
+```
+
+**400 Bad Request - Duplicate Entry:**
+```json
+{
+  "status": 400,
+  "success": false,
+  "message": "Email already registered"
+}
+```
+
+**Postman Example:**
+```
+PUT http://localhost:8000/api/employees/507f1f77bcf86cd799439011
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "firstName": "Jane",
+  "designation": "Senior Software Engineer"
+}
+```
+
+---
+
+### 5. Delete Employee
+
+Soft delete an employee (sets isActive to false).
+
+**Endpoint:** `DELETE /api/employees/:id`
+
+**Authentication:** Required (Bearer Token)
+
+**Authorization:** Admin or HR only
+
+**URL Parameters:**
+- `id` - Employee MongoDB ID
+
+**Success Response (200 OK):**
+```json
+{
+  "status": 200,
+  "success": true,
+  "message": "Employee deleted successfully"
+}
+```
+
+**Error Response (404 Not Found):**
+```json
+{
+  "status": 404,
+  "success": false,
+  "message": "Employee not found"
+}
+```
+
+**Postman Example:**
+```
+DELETE http://localhost:8000/api/employees/507f1f77bcf86cd799439011
+Authorization: Bearer {{accessToken}}
+```
+
+---
+
 ## Notes
 
 - All timestamps are in ISO 8601 format (UTC)
@@ -420,6 +801,12 @@ if (pm.response.code === 200) {
 - Email and username must be unique
 - Tokens should be stored securely on the client side
 - Refresh token functionality will be implemented in future updates
+- **Employee Management:**
+  - Employee ID, email, and mobile number must be unique
+  - Department must exist before creating employee
+  - Soft delete is used (sets isActive to false)
+  - All employee routes require authentication
+  - Create/Update/Delete operations require Admin or HR role
 
 ---
 
