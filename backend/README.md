@@ -8,7 +8,7 @@ Node.js/Express backend API for Employee Resource Management System.
 - **Framework**: Express.js
 - **Database**: MongoDB with Mongoose ODM
 - **Authentication**: JWT (JSON Web Tokens)
-- **Validation**: Joi
+- **Validation**: Zod
 - **File Upload**: Multer
 
 ## Project Structure
@@ -77,6 +77,15 @@ npm start
 
 ### API Base URL
 All API endpoints will be prefixed with `/api`
+
+### Authentication Endpoints
+- `POST /api/auth/register` - Register a new user
+- `POST /api/auth/login` - Login user
+- `GET /api/auth/profile` - Get user profile (protected)
+
+**For detailed API documentation, see [API_DOCUMENTATION.md](./API_DOCUMENTATION.md)**
+
+**For Postman collection, import [POSTMAN_COLLECTION.json](./POSTMAN_COLLECTION.json)**
 
 ## Development
 

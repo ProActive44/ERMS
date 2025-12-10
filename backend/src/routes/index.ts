@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import authRoutes from './authRoutes';
 
 const router = Router();
 
@@ -6,6 +7,9 @@ const router = Router();
 router.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'ERMS API is running' });
 });
+
+// Authentication routes
+router.use('/auth', authRoutes);
 
 // API routes will be added here
 // Example:
