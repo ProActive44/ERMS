@@ -162,5 +162,5 @@ Deleting an employee sets `isActive: false` instead of removing the record. This
 ## See Also
 
 - [API Documentation](./API_DOCUMENTATION.md) - Complete API reference
-- [Postman Collection](./POSTMAN_COLLECTION.json) - Import for testing
+- [API Collection](./POSTMAN_COLLECTION.json) - Import into Hoppscotch (or Postman) for testing
 

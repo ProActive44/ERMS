@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { User } from '../models/User';
 import { Employee } from '../models/Employee';
 import { generateTokens } from '../utils/jwt';
-import { ApiResponse } from '../types';
+import { ApiResponse, Pagination } from '../types';
 import { AuthenticatedRequest } from '../middleware/auth';
 
 /**
@@ -194,14 +194,42 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 };
 
 /**
- * Get current user profile
+ * Get user profile by ID (or own profile if user_id not provided)
  */
 export const getProfile = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
   try {
-    const user = await User.findById(req.user?.userId)
+    const { user_id } = req.params;
+    const authenticatedUserId = req.user?.userId;
+    const authenticatedUserRole = req.user?.role;
+
+    if (!authenticatedUserId) {
+      const response: ApiResponse = {
+        status: 401,
+        success: false,
+        message: 'Authentication required',
+      };
+      res.status(401).json(response);
+      return;
+    }
+
+    // If user_id is not provided, use the authenticated user's ID
+    const targetUserId = user_id || authenticatedUserId;
+
+    // Users can only view their own profile unless they're admin or hr
+    if (targetUserId !== authenticatedUserId && authenticatedUserRole !== 'admin' && authenticatedUserRole !== 'hr') {
+      const response: ApiResponse = {
+        status: 403,
+        success: false,
+        message: 'Insufficient permissions to view this profile',
+      };
+      res.status(403).json(response);
+      return;
+    }
+
+    const user = await User.findById(targetUserId)
       .select('-password')
       .populate({
         path: 'employee',
@@ -235,6 +263,272 @@ export const getProfile = async (
       status: 500,
       success: false,
       message: error.message || 'Error retrieving profile',
+    };
+    res.status(500).json(response);
+  }
+};
+
+/**
+ * Update user profile by ID
+ */
+export const updateProfile = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const { user_id } = req.params;
+    const { email, username, password, firstName, lastName, role, employeeId } = req.body;
+    const authenticatedUserId = req.user?.userId;
+    const authenticatedUserRole = req.user?.role;
+
+    if (!authenticatedUserId) {
+      const response: ApiResponse = {
+        status: 401,
+        success: false,
+        message: 'Authentication required',
+      };
+      res.status(401).json(response);
+      return;
+    }
+
+    // Users can only update their own profile unless they're admin or hr
+    // Only admin can update roles
+    if (user_id !== authenticatedUserId && authenticatedUserRole !== 'admin' && authenticatedUserRole !== 'hr') {
+      const response: ApiResponse = {
+        status: 403,
+        success: false,
+        message: 'Insufficient permissions to update this profile',
+      };
+      res.status(403).json(response);
+      return;
+    }
+
+    // Only admin can update roles
+    if (role !== undefined && authenticatedUserRole !== 'admin') {
+      const response: ApiResponse = {
+        status: 403,
+        success: false,
+        message: 'Only admin can update user roles',
+      };
+      res.status(403).json(response);
+      return;
+    }
+
+    const userId = user_id;
+
+    // Find the user
+    const user = await User.findById(userId);
+    if (!user) {
+      const response: ApiResponse = {
+        status: 404,
+        success: false,
+        message: 'User not found',
+      };
+      res.status(404).json(response);
+      return;
+    }
+
+    // Check for duplicate email if email is being updated
+    if (email && email !== user.email) {
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        const response: ApiResponse = {
+          status: 400,
+          success: false,
+          message: 'Email already registered',
+        };
+        res.status(400).json(response);
+        return;
+      }
+    }
+
+    // Check for duplicate username if username is being updated
+    if (username && username !== user.username) {
+      const existingUser = await User.findOne({ username });
+      if (existingUser) {
+        const response: ApiResponse = {
+          status: 400,
+          success: false,
+          message: 'Username already taken',
+        };
+        res.status(400).json(response);
+        return;
+      }
+    }
+
+    // Handle employee linking/unlinking if employeeId is provided
+    if (employeeId !== undefined) {
+      if (employeeId === null || employeeId === '') {
+        // Unlinking employee - remove reference from user and employee
+        if (user.employee) {
+          const currentEmployee = await Employee.findById(user.employee);
+          if (currentEmployee) {
+            currentEmployee.user = undefined;
+            await currentEmployee.save();
+          }
+        }
+        user.employee = null;
+      } else {
+        // Linking employee - validate employee exists and isn't already linked
+        const employee = await Employee.findById(employeeId);
+        if (!employee) {
+          const response: ApiResponse = {
+            status: 400,
+            success: false,
+            message: 'Employee not found',
+          };
+          res.status(400).json(response);
+          return;
+        }
+
+        // Check if employee is already linked to another user
+        if (employee.user && employee.user.toString() !== userId) {
+          const response: ApiResponse = {
+            status: 400,
+            success: false,
+            message: 'Employee is already linked to another user',
+          };
+          res.status(400).json(response);
+          return;
+        }
+
+        // Unlink previous employee if exists
+        if (user.employee && user.employee.toString() !== employeeId) {
+          const previousEmployee = await Employee.findById(user.employee);
+          if (previousEmployee) {
+            previousEmployee.user = undefined;
+            await previousEmployee.save();
+          }
+        }
+
+        // Link new employee
+        user.employee = employeeId as any;
+        employee.user = user._id;
+        await employee.save();
+      }
+    }
+
+    // Update user fields
+    if (email) user.email = email;
+    if (username) user.username = username;
+    if (password) user.password = password; // Will be hashed by pre-save hook
+    if (firstName) user.firstName = firstName;
+    if (lastName) user.lastName = lastName;
+    if (role && authenticatedUserRole === 'admin') user.role = role;
+
+    await user.save();
+
+    // Populate employee data for response
+    await user.populate({
+      path: 'employee',
+      select: 'employeeId designation department address documents',
+      populate: {
+        path: 'department',
+        select: 'name description',
+      },
+    });
+
+    const response: ApiResponse = {
+      status: 200,
+      success: true,
+      message: 'Profile updated successfully',
+      data: user,
+    };
+
+    res.status(200).json(response);
+  } catch (error: any) {
+    const response: ApiResponse = {
+      status: 500,
+      success: false,
+      message: error.message || 'Error updating profile',
+    };
+    res.status(500).json(response);
+  }
+};
+
+/**
+ * Get list of users with pagination and filters
+ */
+export const getUserList = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      search,
+      role,
+      isActive,
+    } = req.query;
+
+    const query: any = {};
+
+    // Search filter
+    if (search) {
+      query.$or = [
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+        { username: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    // Role filter
+    if (role) {
+      query.role = role;
+    }
+
+    // Active status filter
+    if (isActive !== undefined) {
+      query.isActive = isActive === 'true';
+    }
+
+    const pageNum = Number(page);
+    const limitNum = Number(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Get users and total count
+    const [users, total] = await Promise.all([
+      User.find(query)
+        .select('-password')
+        .populate({
+          path: 'employee',
+          select: 'employeeId designation department address',
+          populate: {
+            path: 'department',
+            select: 'name description',
+          },
+        })
+        .skip(skip)
+        .limit(limitNum)
+        .sort({ createdAt: -1 }),
+      User.countDocuments(query),
+    ]);
+
+    const pagination: Pagination = {
+      page: pageNum,
+      limit: limitNum,
+      total,
+      pages: Math.ceil(total / limitNum),
+    };
+
+    const response: ApiResponse = {
+      status: 200,
+      success: true,
+      message: 'Users retrieved successfully',
+      data: {
+        users,
+        pagination,
+      },
+    };
+
+    res.status(200).json(response);
+  } catch (error: any) {
+    const response: ApiResponse = {
+      status: 500,
+      success: false,
+      message: error.message || 'Error retrieving users',
     };
     res.status(500).json(response);
   }

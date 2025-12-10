@@ -94,7 +94,7 @@ All API endpoints will be prefixed with `/api`
 
 **For employee management guide, see [EMPLOYEE_MANAGEMENT_GUIDE.md](./EMPLOYEE_MANAGEMENT_GUIDE.md)**
 
-**For Postman collection, import [POSTMAN_COLLECTION.json](./POSTMAN_COLLECTION.json)**
+**For API testing, import [POSTMAN_COLLECTION.json](./POSTMAN_COLLECTION.json) into Hoppscotch (or Postman)**
 
 ## Development
 

@@ -8,7 +8,7 @@ export interface IUser extends Document {
   firstName: string;
   lastName: string;
   role: 'admin' | 'hr' | 'employee';
-  employee?: mongoose.Types.ObjectId; // Optional - user might not be an employee
+  employee?: mongoose.Types.ObjectId | null; // Optional - user might not be an employee
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;

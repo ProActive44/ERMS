@@ -34,7 +34,8 @@ Register a new user account.
   "password": "password123",
   "firstName": "John",
   "lastName": "Doe",
-  "role": "employee"
+  "role": "employee",
+  "employeeId": "507f1f77bcf86cd799439011"
 }
 ```
 
@@ -48,6 +49,7 @@ Register a new user account.
 | firstName | string | Yes | User's first name | 1-50 characters |
 | lastName | string | Yes | User's last name | 1-50 characters |
 | role | string | No | User role | `admin`, `hr`, or `employee` (default: `employee`) |
+| employeeId | string | No | Employee ID to link user to employee | Must be valid Employee ID, employee must exist and not be linked to another user |
 
 **Success Response (201 Created):**
 ```json
@@ -62,13 +64,16 @@ Register a new user account.
       "username": "johndoe",
       "firstName": "John",
       "lastName": "Doe",
-      "role": "employee"
+      "role": "employee",
+      "employee": "507f1f77bcf86cd799439011"
     },
     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
     "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
   }
 }
 ```
+
+**Note:** If `employeeId` is provided, the user will be linked to that employee. The `employee` field in the response will contain the employee ID if linked, or `null` if not linked.
 
 **Error Responses:**
 
@@ -94,6 +99,24 @@ Register a new user account.
 }
 ```
 
+**400 Bad Request - Employee Not Found:**
+```json
+{
+  "status": 400,
+  "success": false,
+  "message": "Employee not found"
+}
+```
+
+**400 Bad Request - Employee Already Linked:**
+```json
+{
+  "status": 400,
+  "success": false,
+  "message": "Employee already has a user account"
+}
+```
+
 **500 Internal Server Error:**
 ```json
 {
@@ -103,7 +126,7 @@ Register a new user account.
 }
 ```
 
-**Postman Example:**
+**Hoppscotch Example:**
 ```
 POST http://localhost:8000/api/auth/register
 Content-Type: application/json
@@ -206,7 +229,7 @@ Authenticate user and receive access tokens.
 }
 ```
 
-**Postman Example:**
+**Hoppscotch Example:**
 ```
 POST http://localhost:8000/api/auth/login
 Content-Type: application/json
@@ -245,12 +268,26 @@ Authorization: Bearer <access_token>
     "firstName": "John",
     "lastName": "Doe",
     "role": "employee",
+    "employee": {
+      "_id": "507f1f77bcf86cd799439012",
+      "employeeId": "EMP001",
+      "designation": "Software Engineer",
+      "department": {
+        "_id": "507f1f77bcf86cd799439013",
+        "name": "Engineering",
+        "description": "Software Development"
+      },
+      "address": "123 Main St",
+      "documents": []
+    },
     "isActive": true,
     "createdAt": "2024-12-19T10:00:00.000Z",
     "updatedAt": "2024-12-19T10:00:00.000Z"
   }
 }
 ```
+
+**Note:** The `employee` field will be populated if the user is linked to an employee record. If not linked, `employee` will be `null`.
 
 **Error Responses:**
 
@@ -290,7 +327,7 @@ Authorization: Bearer <access_token>
 }
 ```
 
-**Postman Example:**
+**Hoppscotch Example:**
 ```
 GET http://localhost:8000/api/auth/profile
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
@@ -353,47 +390,51 @@ All API responses follow this structure:
 
 ---
 
-## Testing with Postman
+## Testing with Hoppscotch
 
 ### Quick Setup
 
-1. **Create a Collection:**
-   - Create a new collection named "ERMS API"
-   - Set base URL variable: `{{baseUrl}}` = `http://localhost:8000/api`
+1. **Import Collection:**
+   - Open [Hoppscotch](https://hoppscotch.io)
+   - Click "Import" and select `POSTMAN_COLLECTION.json` from the backend folder
+   - The collection will be imported with all endpoints pre-configured
 
-2. **Register User:**
-   - Method: `POST`
-   - URL: `{{baseUrl}}/auth/register`
-   - Body (raw JSON): Use the register request body example above
+2. **Set Environment Variables:**
+   - Create a new environment in Hoppscotch
+   - Add variable: `baseUrl` = `http://localhost:8000/api`
+   - Add variable: `accessToken` = (will be set after login)
 
-3. **Login:**
-   - Method: `POST`
-   - URL: `{{baseUrl}}/auth/login`
-   - Body (raw JSON): Use the login request body example above
-   - **Save the `accessToken` from response to a collection variable**
+3. **Register User:**
+   - Select `POST /api/auth/register` from the collection
+   - Update the request body with your test data
+   - Click "Send"
 
-4. **Get Profile:**
-   - Method: `GET`
-   - URL: `{{baseUrl}}/auth/profile`
-   - Headers: `Authorization: Bearer {{accessToken}}`
+4. **Login:**
+   - Select `POST /api/auth/login` from the collection
+   - Update the request body with your credentials
+   - Click "Send"
+   - **Copy the `accessToken` from the response and save it to your environment variable**
 
-### Environment Variables (Postman)
+5. **Get Profile:**
+   - Select `GET /api/auth/profile` from the collection
+   - In the Headers section, add: `Authorization: Bearer {{accessToken}}`
+   - Click "Send"
 
-Create a Postman environment with:
+### Environment Variables (Hoppscotch)
+
+Create a Hoppscotch environment with:
 - `baseUrl`: `http://localhost:8000/api`
-- `accessToken`: (set automatically after login)
-- `refreshToken`: (set automatically after login)
+- `accessToken`: (manually set after login, or use the response handler)
 
-### Postman Pre-request Script (Auto-save token)
+### Using the Collection
 
-Add this to your Login request's "Tests" tab:
-```javascript
-if (pm.response.code === 200) {
-    const response = pm.response.json();
-    pm.environment.set("accessToken", response.data.accessToken);
-    pm.environment.set("refreshToken", response.data.refreshToken);
-}
-```
+The imported collection includes:
+- All authentication endpoints
+- All employee management endpoints
+- Pre-configured request bodies
+- Environment variable placeholders
+
+**Note:** Hoppscotch can import Postman collections directly, so the `POSTMAN_COLLECTION.json` file works perfectly with Hoppscotch.
 
 ---
 
@@ -473,7 +514,7 @@ Get a paginated list of employees with optional filters.
 }
 ```
 
-**Postman Example:**
+**Hoppscotch Example:**
 ```
 GET http://localhost:8000/api/employees?page=1&limit=10&search=john
 Authorization: Bearer {{accessToken}}
@@ -512,12 +553,21 @@ Get a single employee's details by ID.
       "description": "Information Technology"
     },
     "address": "123 Main St",
+    "user": {
+      "_id": "507f1f77bcf86cd799439014",
+      "email": "john.doe@example.com",
+      "username": "johndoe",
+      "role": "employee"
+    },
     "documents": [],
     "isActive": true,
     "createdAt": "2024-12-19T10:00:00.000Z",
     "updatedAt": "2024-12-19T10:00:00.000Z"
   }
 }
+```
+
+**Note:** The `user` field will be populated if the employee is linked to a user account. If not linked, `user` will be `null`.
 ```
 
 **Error Response (404 Not Found):**
@@ -529,7 +579,7 @@ Get a single employee's details by ID.
 }
 ```
 
-**Postman Example:**
+**Hoppscotch Example:**
 ```
 GET http://localhost:8000/api/employees/507f1f77bcf86cd799439011
 Authorization: Bearer {{accessToken}}
@@ -564,7 +614,8 @@ Create a new employee record.
       "url": "https://example.com/docs/id.pdf"
     }
   ],
-  "isActive": true
+  "isActive": true,
+  "userId": "507f1f77bcf86cd799439014"
 }
 ```
 
@@ -582,6 +633,7 @@ Create a new employee record.
 | address | string | No | Employee address | Max 500 characters |
 | documents | array | No | Employee documents | Array of document objects |
 | isActive | boolean | No | Active status | Default: true |
+| userId | string | No | User ID to link employee to user account | Must be valid User ID, user must exist and not be linked to another employee |
 
 **Success Response (201 Created):**
 ```json
@@ -603,12 +655,21 @@ Create a new employee record.
       "description": "Information Technology"
     },
     "address": "123 Main St",
+    "user": {
+      "_id": "507f1f77bcf86cd799439014",
+      "email": "john.doe@example.com",
+      "username": "johndoe",
+      "role": "employee"
+    },
     "documents": [],
     "isActive": true,
     "createdAt": "2024-12-19T10:00:00.000Z",
     "updatedAt": "2024-12-19T10:00:00.000Z"
   }
 }
+```
+
+**Note:** The `user` field will be populated if the employee is linked to a user account. If not linked, `user` will be `null`.
 ```
 
 **Error Responses:**
@@ -653,7 +714,7 @@ Create a new employee record.
 }
 ```
 
-**Postman Example:**
+**Hoppscotch Example:**
 ```
 POST http://localhost:8000/api/employees
 Authorization: Bearer {{accessToken}}
@@ -691,9 +752,12 @@ Update an existing employee record.
 {
   "firstName": "Jane",
   "designation": "Senior Software Engineer",
-  "address": "456 Oak Ave"
+  "address": "456 Oak Ave",
+  "userId": "507f1f77bcf86cd799439014"
 }
 ```
+
+**Note:** To link an employee to a user, provide `userId`. To unlink, set `userId` to `null`. The user must exist and not be linked to another employee.
 
 **Success Response (200 OK):**
 ```json
@@ -714,6 +778,12 @@ Update an existing employee record.
       "name": "IT"
     },
     "address": "456 Oak Ave",
+    "user": {
+      "_id": "507f1f77bcf86cd799439014",
+      "email": "john.doe@example.com",
+      "username": "johndoe",
+      "role": "employee"
+    },
     "isActive": true,
     "updatedAt": "2024-12-19T11:00:00.000Z"
   }
@@ -721,6 +791,33 @@ Update an existing employee record.
 ```
 
 **Error Responses:**
+
+**400 Bad Request - User Not Found:**
+```json
+{
+  "status": 400,
+  "success": false,
+  "message": "User not found"
+}
+```
+
+**400 Bad Request - User Already Linked:**
+```json
+{
+  "status": 400,
+  "success": false,
+  "message": "User is already linked to another employee"
+}
+```
+
+**400 Bad Request - Employee Already Linked:**
+```json
+{
+  "status": 400,
+  "success": false,
+  "message": "Employee is already linked to another user"
+}
+```
 
 **404 Not Found:**
 ```json
@@ -740,7 +837,7 @@ Update an existing employee record.
 }
 ```
 
-**Postman Example:**
+**Hoppscotch Example:**
 ```
 PUT http://localhost:8000/api/employees/507f1f77bcf86cd799439011
 Authorization: Bearer {{accessToken}}
@@ -785,7 +882,7 @@ Soft delete an employee (sets isActive to false).
 }
 ```
 
-**Postman Example:**
+**Hoppscotch Example:**
 ```
 DELETE http://localhost:8000/api/employees/507f1f77bcf86cd799439011
 Authorization: Bearer {{accessToken}}
