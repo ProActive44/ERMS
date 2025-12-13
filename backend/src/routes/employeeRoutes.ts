@@ -45,3 +45,9 @@ router.delete('/:id', requireRole('admin', 'hr'), deleteEmployee);
 
 export default router;
 
+
+
+
+
+
+

@@ -33,3 +33,9 @@ const DepartmentSchema = new Schema<IDepartment>(
 
 export const Department = mongoose.model<IDepartment>('Department', DepartmentSchema);
 
+
+
+
+
+
+
