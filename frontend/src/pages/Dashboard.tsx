@@ -31,7 +31,7 @@ const Dashboard: React.FC = () => {
                 Welcome, {user.firstName} {user.lastName}
               </span>
               <span className="px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800">
-                {user.role.toUpperCase()}
+                {user.role?.toUpperCase() || 'EMPLOYEE'}
               </span>
               <button
                 onClick={handleLogout}
@@ -46,11 +46,11 @@ const Dashboard: React.FC = () => {
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <div className="border-4 border-dashed border-gray-200 rounded-lg h-96 p-8">
+          <div className="mb-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
               Welcome to ERMS!
             </h2>
-            <div className="space-y-4">
+            <div className="space-y-4 mb-6">
               <div>
                 <p className="text-gray-600">
                   <strong>Email:</strong> {user.email}
@@ -59,13 +59,60 @@ const Dashboard: React.FC = () => {
                   <strong>Username:</strong> {user.username}
                 </p>
                 <p className="text-gray-600">
-                  <strong>Role:</strong> {user.role}
+                  <strong>Role:</strong> {user.role || 'employee'}
                 </p>
               </div>
-              <p className="text-gray-500 mt-4">
-                Your authentication is working! You can now start building your
-                ERMS features.
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <button
+              onClick={() => navigate('/employees')}
+              className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition text-left"
+            >
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Employee Management
+              </h3>
+              <p className="text-gray-600">
+                View and manage employee records, add new employees, and update
+                information.
               </p>
+            </button>
+
+            <div className="bg-gray-100 p-6 rounded-lg shadow text-left opacity-50 cursor-not-allowed">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Attendance
+              </h3>
+              <p className="text-gray-600">Coming soon...</p>
+            </div>
+
+            <div className="bg-gray-100 p-6 rounded-lg shadow text-left opacity-50 cursor-not-allowed">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Leave Management
+              </h3>
+              <p className="text-gray-600">Coming soon...</p>
+            </div>
+
+            <div className="bg-gray-100 p-6 rounded-lg shadow text-left opacity-50 cursor-not-allowed">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Projects
+              </h3>
+              <p className="text-gray-600">Coming soon...</p>
+            </div>
+
+            <div className="bg-gray-100 p-6 rounded-lg shadow text-left opacity-50 cursor-not-allowed">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Tasks
+              </h3>
+              <p className="text-gray-600">Coming soon...</p>
+            </div>
+
+            <div className="bg-gray-100 p-6 rounded-lg shadow text-left opacity-50 cursor-not-allowed">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Reports
+              </h3>
+              <p className="text-gray-600">Coming soon...</p>
             </div>
           </div>
         </div>
