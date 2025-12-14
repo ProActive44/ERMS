@@ -17,10 +17,10 @@ const ApplyLeave: React.FC = () => {
     reason: '',
   });
 
-  const [errors, setErrors] = useState<Partial<LeaveFormData>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof LeaveFormData, string>>>({});
 
   const validate = (): boolean => {
-    const newErrors: Partial<LeaveFormData> = {};
+    const newErrors: Partial<Record<keyof LeaveFormData, string>> = {};
 
     if (!formData.leaveType) {
       newErrors.leaveType = 'Required';
