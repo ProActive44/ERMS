@@ -24,7 +24,7 @@ export interface AuthResponse {
     role: string;
   };
   accessToken: string;
-  refreshToken: string;
+  // refreshToken is now in httpOnly cookie, not in response
 }
 
 export const authApi = {
@@ -38,9 +38,13 @@ export const authApi = {
     return response.data.data;
   },
 
-  refreshToken: async (refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> => {
-    const response = await apiClient.post('/auth/refresh-token', { refreshToken });
+  refreshToken: async (): Promise<{ accessToken: string }> => {
+    const response = await apiClient.post('/auth/refresh-token', {});
     return response.data.data;
+  },
+
+  logout: async (): Promise<void> => {
+    await apiClient.post('/auth/logout');
   },
 
   getProfile: async () => {

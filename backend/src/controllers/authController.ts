@@ -42,11 +42,31 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     await user.save();
 
     // Generate tokens
+    const { hashToken } = require('../utils/jwt');
     const tokens = generateTokens({
       userId: user._id.toString(),
       email: user.email,
       username: user.username,
       role: user.role,
+    });
+
+    // Store hashed refresh token in database
+    const hashedRefreshToken = hashToken(tokens.refreshToken);
+    user.refreshTokens = user.refreshTokens || [];
+    user.refreshTokens.push(hashedRefreshToken);
+    
+    // Keep only last 5 refresh tokens (limit active sessions)
+    if (user.refreshTokens.length > 5) {
+      user.refreshTokens = user.refreshTokens.slice(-5);
+    }
+    await user.save();
+
+    // Set refresh token in httpOnly cookie
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
     const response: ApiResponse = {
@@ -62,7 +82,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
           lastName: user.lastName,
           role: user.role,
         },
-        ...tokens,
+        accessToken: tokens.accessToken,
       },
     };
 
@@ -122,11 +142,34 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Generate tokens
+    const { hashToken } = require('../utils/jwt');
     const tokens = generateTokens({
       userId: user._id.toString(),
       email: user.email,
       username: user.username,
       role: user.role,
+    });
+
+    // Store hashed refresh token in database
+    const hashedRefreshToken = hashToken(tokens.refreshToken);
+    const userWithTokens = await User.findById(user._id).select('+refreshTokens');
+    if (userWithTokens) {
+      userWithTokens.refreshTokens = userWithTokens.refreshTokens || [];
+      userWithTokens.refreshTokens.push(hashedRefreshToken);
+      
+      // Keep only last 5 refresh tokens (limit active sessions)
+      if (userWithTokens.refreshTokens.length > 5) {
+        userWithTokens.refreshTokens = userWithTokens.refreshTokens.slice(-5);
+      }
+      await userWithTokens.save();
+    }
+
+    // Set refresh token in httpOnly cookie
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
     const response: ApiResponse = {
@@ -142,7 +185,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
           lastName: user.lastName,
           role: user.role,
         },
-        ...tokens,
+        accessToken: tokens.accessToken,
       },
     };
 
@@ -165,7 +208,8 @@ export const refreshToken = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { refreshToken } = req.body;
+    // Get refresh token from httpOnly cookie
+    const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken) {
       const response: ApiResponse = {
@@ -178,13 +222,14 @@ export const refreshToken = async (
     }
 
     // Verify refresh token
-    const { verifyRefreshToken, generateTokens } = require('../utils/jwt');
+    const { verifyRefreshToken, generateTokens, hashToken } = require('../utils/jwt');
     const decoded = verifyRefreshToken(refreshToken);
 
     // Verify user still exists and is active
-    const user = await User.findById(decoded.userId);
+    const user = await User.findById(decoded.userId).select('+refreshTokens');
 
     if (!user || !user.isActive) {
+      res.clearCookie('refreshToken');
       const response: ApiResponse = {
         status: 401,
         success: false,
@@ -194,7 +239,29 @@ export const refreshToken = async (
       return;
     }
 
-    // Generate new tokens
+    // Verify refresh token exists in database (not revoked)
+    const hashedToken = hashToken(refreshToken);
+    const tokenExists = user.refreshTokens?.includes(hashedToken);
+
+    if (!tokenExists) {
+      // Token reuse detected! Possible attack - revoke all tokens
+      user.refreshTokens = [];
+      await user.save();
+      res.clearCookie('refreshToken');
+      
+      const response: ApiResponse = {
+        status: 401,
+        success: false,
+        message: 'Token reuse detected. All sessions revoked.',
+      };
+      res.status(401).json(response);
+      return;
+    }
+
+    // Remove old refresh token
+    user.refreshTokens = user.refreshTokens.filter((t: string) => t !== hashedToken);
+
+    // Generate new tokens (token rotation)
     const tokens = generateTokens({
       userId: user._id.toString(),
       email: user.email,
@@ -202,16 +269,38 @@ export const refreshToken = async (
       role: user.role,
     });
 
+    // Store new hashed refresh token
+    const newHashedToken = hashToken(tokens.refreshToken);
+    user.refreshTokens.push(newHashedToken);
+    
+    // Keep only last 5 refresh tokens
+    if (user.refreshTokens.length > 5) {
+      user.refreshTokens = user.refreshTokens.slice(-5);
+    }
+    
+    await user.save();
+
+    // Set new refresh token in httpOnly cookie
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
     const response: ApiResponse = {
       status: 200,
       success: true,
       message: 'Token refreshed successfully',
-      data: tokens,
+      data: {
+        accessToken: tokens.accessToken,
+      },
     };
 
     res.status(200).json(response);
   } catch (error: unknown) {
     const axiosError = error as { message?: string };
+    res.clearCookie('refreshToken');
     const response: ApiResponse = {
       status: 401,
       success: false,
@@ -257,6 +346,50 @@ export const getProfile = async (
       status: 500,
       success: false,
       message: axiosError.message || 'Error retrieving profile',
+    };
+    res.status(500).json(response);
+  }
+};
+
+/**
+ * Logout user and revoke refresh token
+ */
+export const logout = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (refreshToken && req.user?.userId) {
+      // Remove refresh token from database
+      const { hashToken } = require('../utils/jwt');
+      const hashedToken = hashToken(refreshToken);
+      
+      const user = await User.findById(req.user.userId).select('+refreshTokens');
+      if (user) {
+        user.refreshTokens = user.refreshTokens.filter((t: string) => t !== hashedToken);
+        await user.save();
+      }
+    }
+
+    // Clear refresh token cookie
+    res.clearCookie('refreshToken');
+
+    const response: ApiResponse = {
+      status: 200,
+      success: true,
+      message: 'Logged out successfully',
+    };
+
+    res.status(200).json(response);
+  } catch (error: unknown) {
+    const axiosError = error as { message?: string };
+    res.clearCookie('refreshToken');
+    const response: ApiResponse = {
+      status: 500,
+      success: false,
+      message: axiosError.message || 'Error logging out',
     };
     res.status(500).json(response);
   }

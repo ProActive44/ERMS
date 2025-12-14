@@ -9,6 +9,7 @@ export interface IUser extends Document {
   lastName: string;
   role: 'admin' | 'hr' | 'employee';
   isActive: boolean;
+  refreshTokens: string[]; // Store hashed refresh tokens
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -55,6 +56,11 @@ const UserSchema = new Schema<IUser>(
     isActive: {
       type: Boolean,
       default: true,
+    },
+    refreshTokens: {
+      type: [String],
+      default: [],
+      select: false, // Don't include by default
     },
   },
   {

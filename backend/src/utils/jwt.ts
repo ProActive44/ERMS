@@ -1,4 +1,5 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
+import crypto from 'crypto';
 import { config } from '../config/env';
 
 export interface JWTPayload {
@@ -6,7 +7,15 @@ export interface JWTPayload {
   email: string;
   username: string;
   role: string;
+  tokenId?: string; // For refresh token tracking
 }
+
+/**
+ * Hash token for secure storage
+ */
+export const hashToken = (token: string): string => {
+  return crypto.createHash('sha256').update(token).digest('hex');
+};
 
 /**
  * Generate access and refresh tokens
@@ -18,13 +27,15 @@ export const generateTokens = (payload: JWTPayload) => {
     { expiresIn: config.jwt.expiresIn } as SignOptions
   );
 
+  // Add unique token ID for refresh token
+  const tokenId = crypto.randomBytes(32).toString('hex');
   const refreshToken = jwt.sign(
-    payload,
+    { ...payload, tokenId },
     config.jwt.refreshSecret,
     { expiresIn: config.jwt.refreshExpiresIn } as SignOptions
   );
 
-  return { accessToken, refreshToken };
+  return { accessToken, refreshToken, tokenId };
 };
 
 /**

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
-import { logout } from '../store/authSlice';
+import { logoutUser } from '../store/authSlice';
 import { Home, Users, LogOut, Menu, X, FolderKanban, Calendar, FileText } from 'lucide-react';
 
 const Navbar: React.FC = () => {
@@ -11,8 +11,8 @@ const Navbar: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
-  const handleLogout = () => {
-    dispatch(logout());
+  const handleLogout = async () => {
+    await dispatch(logoutUser());
     navigate('/login');
   };
 

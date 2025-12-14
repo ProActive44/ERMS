@@ -6,6 +6,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Important: Send cookies with requests
 });
 
 let isRefreshing = false;
@@ -67,28 +68,19 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      const refreshToken = localStorage.getItem('refreshToken');
-
-      if (!refreshToken) {
-        // No refresh token, redirect to login
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
-        return Promise.reject(error);
-      }
-
+      // Refresh token is in httpOnly cookie, attempt refresh
       try {
-        // Try to refresh the token
-        const response = await axios.post(`${config.apiUrl}/auth/refresh-token`, {
-          refreshToken,
-        });
+        // Try to refresh the token (refreshToken is automatically sent in cookie)
+        const response = await axios.post(
+          `${config.apiUrl}/auth/refresh-token`,
+          {},
+          { withCredentials: true }
+        );
 
-        const { accessToken, refreshToken: newRefreshToken } = response.data.data;
+        const { accessToken } = response.data.data;
 
-        // Update tokens in localStorage
+        // Update access token in localStorage
         localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', newRefreshToken);
 
         // Update authorization header
         if (originalRequest.headers) {
@@ -108,7 +100,6 @@ apiClient.interceptors.response.use(
         isRefreshing = false;
 
         localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
         window.location.href = '/login';
 
