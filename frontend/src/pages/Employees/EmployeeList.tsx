@@ -35,7 +35,7 @@ const EmployeeList: React.FC = () => {
       setFilters({
         ...filters,
         department: departmentFilter || undefined,
-        status: statusFilter as any,
+        status: (statusFilter as 'Active' | 'Inactive' | 'On Leave' | 'Terminated') || undefined,
         page: 1,
       })
     );

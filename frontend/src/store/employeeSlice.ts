@@ -40,12 +40,12 @@ const initialState: EmployeeState = {
 // Async thunks
 export const fetchEmployees = createAsyncThunk(
   'employees/fetchEmployees',
-  async (filters?: EmployeeFilters, { rejectWithValue }) => {
+  async (filters: EmployeeFilters | undefined, { rejectWithValue }) => {
     try {
       const response = await employeeApi.getAll(filters);
       return response;
-    } catch (error: any) {
-      const message = error.response?.data?.message || 'Failed to fetch employees';
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to fetch employees';
       toast.error(message);
       return rejectWithValue(message);
     }
@@ -58,8 +58,8 @@ export const fetchEmployeeById = createAsyncThunk(
     try {
       const response = await employeeApi.getById(id);
       return response;
-    } catch (error: any) {
-      const message = error.response?.data?.message || 'Failed to fetch employee';
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to fetch employee';
       toast.error(message);
       return rejectWithValue(message);
     }
@@ -73,8 +73,8 @@ export const createEmployee = createAsyncThunk(
       const response = await employeeApi.create(data);
       toast.success('Employee created successfully');
       return response;
-    } catch (error: any) {
-      const message = error.response?.data?.message || 'Failed to create employee';
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to create employee';
       toast.error(message);
       return rejectWithValue(message);
     }
@@ -88,8 +88,8 @@ export const updateEmployee = createAsyncThunk(
       const response = await employeeApi.update(id, data);
       toast.success('Employee updated successfully');
       return response;
-    } catch (error: any) {
-      const message = error.response?.data?.message || 'Failed to update employee';
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to update employee';
       toast.error(message);
       return rejectWithValue(message);
     }
@@ -103,8 +103,8 @@ export const deleteEmployee = createAsyncThunk(
       await employeeApi.delete(id);
       toast.success('Employee deleted successfully');
       return id;
-    } catch (error: any) {
-      const message = error.response?.data?.message || 'Failed to delete employee';
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to delete employee';
       toast.error(message);
       return rejectWithValue(message);
     }

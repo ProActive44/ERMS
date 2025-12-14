@@ -1,11 +1,12 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import { AuthenticatedRequest } from '../middleware/auth';
 import { Employee } from '../models/Employee';
 import { ApiResponse } from '../types';
 import mongoose from 'mongoose';
 
 // Get all employees with pagination, filtering, and search
 export const getAllEmployees = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
@@ -71,6 +72,7 @@ export const getAllEmployees = async (
       .lean();
 
     const response: ApiResponse = {
+      status: 200,
       success: true,
       message: 'Employees retrieved successfully',
       data: {
@@ -92,7 +94,7 @@ export const getAllEmployees = async (
 
 // Get employee by ID
 export const getEmployeeById = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
@@ -115,6 +117,7 @@ export const getEmployeeById = async (
 
     if (!employee) {
       res.status(404).json({
+        status: 404,
         success: false,
         message: 'Employee not found',
       });
@@ -122,6 +125,7 @@ export const getEmployeeById = async (
     }
 
     const response: ApiResponse = {
+      status: 200,
       success: true,
       message: 'Employee retrieved successfully',
       data: employee,
@@ -135,7 +139,7 @@ export const getEmployeeById = async (
 
 // Create new employee
 export const createEmployee = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
@@ -149,6 +153,7 @@ export const createEmployee = async (
 
     if (existingEmployee) {
       res.status(400).json({
+        status: 400,
         success: false,
         message: 'Employee ID already exists',
       });
@@ -160,6 +165,7 @@ export const createEmployee = async (
 
     if (existingEmail) {
       res.status(400).json({
+        status: 400,
         success: false,
         message: 'Email already exists',
       });
@@ -170,6 +176,7 @@ export const createEmployee = async (
     if (employeeData.managerId) {
       if (!mongoose.Types.ObjectId.isValid(employeeData.managerId)) {
         res.status(400).json({
+          status: 400,
           success: false,
           message: 'Invalid manager ID',
         });
@@ -179,6 +186,7 @@ export const createEmployee = async (
       const manager = await Employee.findById(employeeData.managerId);
       if (!manager) {
         res.status(400).json({
+          status: 400,
           success: false,
           message: 'Manager not found',
         });
@@ -198,6 +206,7 @@ export const createEmployee = async (
       .lean();
 
     const response: ApiResponse = {
+      status: 201,
       success: true,
       message: 'Employee created successfully',
       data: populatedEmployee,
@@ -211,7 +220,7 @@ export const createEmployee = async (
 
 // Update employee
 export const updateEmployee = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
@@ -221,6 +230,7 @@ export const updateEmployee = async (
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       res.status(400).json({
+        status: 400,
         success: false,
         message: 'Invalid employee ID',
       });
@@ -231,6 +241,7 @@ export const updateEmployee = async (
 
     if (!employee) {
       res.status(404).json({
+        status: 404,
         success: false,
         message: 'Employee not found',
       });
@@ -242,6 +253,7 @@ export const updateEmployee = async (
       const existingEmail = await Employee.findOne({ email: updateData.email });
       if (existingEmail) {
         res.status(400).json({
+          status: 400,
           success: false,
           message: 'Email already exists',
         });
@@ -253,6 +265,7 @@ export const updateEmployee = async (
     if (updateData.managerId) {
       if (!mongoose.Types.ObjectId.isValid(updateData.managerId)) {
         res.status(400).json({
+          status: 400,
           success: false,
           message: 'Invalid manager ID',
         });
@@ -262,6 +275,7 @@ export const updateEmployee = async (
       const manager = await Employee.findById(updateData.managerId);
       if (!manager) {
         res.status(400).json({
+          status: 400,
           success: false,
           message: 'Manager not found',
         });
@@ -283,6 +297,7 @@ export const updateEmployee = async (
       .lean();
 
     const response: ApiResponse = {
+      status: 200,
       success: true,
       message: 'Employee updated successfully',
       data: updatedEmployee,
@@ -296,7 +311,7 @@ export const updateEmployee = async (
 
 // Delete employee (soft delete by setting status to Terminated)
 export const deleteEmployee = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
@@ -305,6 +320,7 @@ export const deleteEmployee = async (
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       res.status(400).json({
+        status: 400,
         success: false,
         message: 'Invalid employee ID',
       });
@@ -315,6 +331,7 @@ export const deleteEmployee = async (
 
     if (!employee) {
       res.status(404).json({
+        status: 404,
         success: false,
         message: 'Employee not found',
       });
@@ -327,6 +344,7 @@ export const deleteEmployee = async (
     await employee.save();
 
     const response: ApiResponse = {
+      status: 200,
       success: true,
       message: 'Employee deleted successfully',
     };
@@ -339,7 +357,7 @@ export const deleteEmployee = async (
 
 // Get employee statistics
 export const getEmployeeStats = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
@@ -381,6 +399,7 @@ export const getEmployeeStats = async (
     ]);
 
     const response: ApiResponse = {
+      status: 200,
       success: true,
       message: 'Employee statistics retrieved successfully',
       data: stats[0],
