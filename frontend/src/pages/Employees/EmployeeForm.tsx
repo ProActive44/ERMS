@@ -12,12 +12,48 @@ import {
 import { EmployeeFormData } from '../../types/employee';
 import { ArrowLeft } from 'lucide-react';
 
+// Dummy data for testing - generates unique ID each time
+const generateDummyEmployeeData = (): EmployeeFormData => {
+  const timestamp = Date.now();
+  return {
+    employeeId: `EMP${timestamp.toString().slice(-6)}`,
+    firstName: 'John',
+    lastName: 'Doe',
+    email: `john.doe${timestamp}@company.com`,
+    phone: `${timestamp.toString().slice(-10)}`,
+    dateOfBirth: '1990-01-15',
+    gender: 'Male',
+    address: {
+      street: '123 Main Street',
+      city: 'New York',
+      state: 'NY',
+      zipCode: '10001',
+      country: 'USA',
+    },
+    department: 'Engineering',
+    designation: 'Senior Software Engineer',
+    joiningDate: '2020-01-01',
+    employmentType: 'Full-Time',
+    salary: 75000,
+    managerId: '',
+    status: 'Active',
+    emergencyContact: {
+      name: 'Jane Doe',
+      relationship: 'Spouse',
+      phone: '9876543210',
+    },
+  };
+};
+
 const EmployeeForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { currentEmployee, loading } = useAppSelector((state) => state.employees);
   const isEdit = Boolean(id);
+
+  // Generate dummy data only once when component mounts
+  const dummyData = React.useMemo(() => generateDummyEmployeeData(), []);
 
   useEffect(() => {
     if (isEdit && id) {
@@ -63,45 +99,47 @@ const EmployeeForm: React.FC = () => {
   });
 
   const formik = useFormik<EmployeeFormData>({
-    initialValues: {
-      employeeId: currentEmployee?.employeeId || '',
-      firstName: currentEmployee?.firstName || '',
-      lastName: currentEmployee?.lastName || '',
-      email: currentEmployee?.email || '',
-      phone: currentEmployee?.phone || '',
-      dateOfBirth: currentEmployee?.dateOfBirth
-        ? new Date(currentEmployee.dateOfBirth).toISOString().split('T')[0]
-        : '',
-      gender: currentEmployee?.gender || 'Male',
+    initialValues: isEdit && currentEmployee ? {
+      employeeId: currentEmployee.employeeId,
+      firstName: currentEmployee.firstName,
+      lastName: currentEmployee.lastName,
+      email: currentEmployee.email,
+      phone: currentEmployee.phone,
+      dateOfBirth: new Date(currentEmployee.dateOfBirth).toISOString().split('T')[0],
+      gender: currentEmployee.gender,
       address: {
-        street: currentEmployee?.address?.street || '',
-        city: currentEmployee?.address?.city || '',
-        state: currentEmployee?.address?.state || '',
-        zipCode: currentEmployee?.address?.zipCode || '',
-        country: currentEmployee?.address?.country || '',
+        street: currentEmployee.address.street,
+        city: currentEmployee.address.city,
+        state: currentEmployee.address.state,
+        zipCode: currentEmployee.address.zipCode,
+        country: currentEmployee.address.country,
       },
-      department: currentEmployee?.department || '',
-      designation: currentEmployee?.designation || '',
-      joiningDate: currentEmployee?.joiningDate
-        ? new Date(currentEmployee.joiningDate).toISOString().split('T')[0]
-        : '',
-      employmentType: currentEmployee?.employmentType || 'Full-Time',
-      salary: currentEmployee?.salary || 0,
-      managerId: currentEmployee?.managerId?._id || '',
-      status: currentEmployee?.status || 'Active',
+      department: currentEmployee.department,
+      designation: currentEmployee.designation,
+      joiningDate: new Date(currentEmployee.joiningDate).toISOString().split('T')[0],
+      employmentType: currentEmployee.employmentType,
+      salary: currentEmployee.salary,
+      managerId: currentEmployee.managerId?._id || '',
+      status: currentEmployee.status,
       emergencyContact: {
-        name: currentEmployee?.emergencyContact?.name || '',
-        relationship: currentEmployee?.emergencyContact?.relationship || '',
-        phone: currentEmployee?.emergencyContact?.phone || '',
+        name: currentEmployee.emergencyContact.name,
+        relationship: currentEmployee.emergencyContact.relationship,
+        phone: currentEmployee.emergencyContact.phone,
       },
-    },
+    } : dummyData,
     validationSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
+      // Remove managerId if it's empty
+      const submitData = { ...values };
+      if (!submitData.managerId || submitData.managerId === '') {
+        delete submitData.managerId;
+      }
+
       if (isEdit && id) {
-        await dispatch(updateEmployee({ id, data: values }));
+        await dispatch(updateEmployee({ id, data: submitData }));
       } else {
-        await dispatch(createEmployee(values));
+        await dispatch(createEmployee(submitData));
       }
       navigate('/employees');
     },

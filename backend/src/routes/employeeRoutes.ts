@@ -21,7 +21,7 @@ const router = express.Router();
 router.use(authenticateToken);
 
 // Get employee statistics - Admin/HR only
-router.get('/stats', requireRole('Admin', 'HR'), getEmployeeStats);
+router.get('/stats', requireRole('admin', 'hr'), getEmployeeStats);
 
 // Get all employees with pagination and filters
 router.get('/', validate(getEmployeesQuerySchema), getAllEmployees);
@@ -32,7 +32,7 @@ router.get('/:id', getEmployeeById);
 // Create new employee - Admin/HR only
 router.post(
   '/',
-  requireRole('Admin', 'HR'),
+  requireRole('admin', 'hr'),
   validate(createEmployeeSchema),
   createEmployee
 );
@@ -40,12 +40,12 @@ router.post(
 // Update employee - Admin/HR only
 router.put(
   '/:id',
-  requireRole('Admin', 'HR'),
+  requireRole('admin', 'hr'),
   validate(updateEmployeeSchema),
   updateEmployee
 );
 
 // Delete employee - Admin only
-router.delete('/:id', requireRole('Admin'), deleteEmployee);
+router.delete('/:id', requireRole('admin'), deleteEmployee);
 
 export default router;

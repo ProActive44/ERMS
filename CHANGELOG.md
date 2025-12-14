@@ -53,7 +53,7 @@ Each entry follows this format:
 
 ## Change History
 
-### [2024-12-14] - Employee Management Module Implementation
+### [2024-12-14] - Employee Management Module Implementation & Bug Fixes
 - ✅ Created Employee Mongoose model with comprehensive fields
   - Personal info: name, email, phone, DOB, gender, address
   - Employment: department, designation, joining date, employment type, salary
@@ -125,15 +125,30 @@ Each entry follows this format:
 - `frontend/src/App.tsx`
 - `frontend/src/pages/Dashboard.tsx`
 
+**Bug Fixes & Improvements:**
+- ✅ Fixed auth validation schemas to match validate middleware structure (wrapped in body/query/params)
+- ✅ Fixed role-based authorization - changed capitalized roles ('Admin', 'HR') to lowercase ('admin', 'hr') to match User model
+- ✅ Fixed managerId empty string validation - now removes empty managerId before submission
+- ✅ Added unique constraint to employee phone field in model
+- ✅ Dropped obsolete mobileNumber_1 index from MongoDB (replaced with phone_1)
+- ✅ Generated unique dummy data for testing (Employee ID, email, phone using timestamps)
+- ✅ Used React.useMemo to prevent multiple dummy data generation on re-renders
+- ✅ Fixed import paths in employee pages (../../hooks/redux)
+- ✅ Fixed validation middleware to handle query parameters properly
+- ✅ Fixed TypeScript errors with 'any' types changed to 'unknown'
+- ✅ Fixed optional parameter syntax in Redux thunks
+- ✅ Added debug logging for role-based access control
+
 **Notes:**
 - Complete CRUD operations for employee management
-- Role-based access control implemented (Admin, HR, Employee)
+- Role-based access control implemented (admin, hr, employee - lowercase)
 - Soft delete approach (status changed to Terminated)
 - Search and filter capabilities
 - Pagination support
 - Manager hierarchy support
 - Document upload structure ready
 - Responsive design with Tailwind CSS
+- Unique constraints on employeeId, email, and phone
 - Ready for testing and production use
 
 ### [2024-12-19] - API Documentation Created

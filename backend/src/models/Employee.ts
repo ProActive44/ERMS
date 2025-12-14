@@ -66,6 +66,7 @@ const employeeSchema = new Schema<IEmployee>(
     phone: {
       type: String,
       required: true,
+      unique: true,
       trim: true,
     },
     dateOfBirth: {

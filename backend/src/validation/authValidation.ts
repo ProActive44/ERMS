@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const registerSchema = z.object({
+const registerBodySchema = z.object({
   email: z.string().email('Please provide a valid email address'),
   username: z
     .string()
@@ -21,11 +21,23 @@ export const registerSchema = z.object({
   role: z.enum(['admin', 'hr', 'employee']).default('employee').optional(),
 });
 
-export const loginSchema = z.object({
+const loginBodySchema = z.object({
   email: z.string().email('Please provide a valid email address'),
   password: z.string().min(1, 'Password is required'),
 });
 
+export const registerSchema = z.object({
+  body: registerBodySchema,
+  query: z.object({}).optional(),
+  params: z.object({}).optional(),
+});
+
+export const loginSchema = z.object({
+  body: loginBodySchema,
+  query: z.object({}).optional(),
+  params: z.object({}).optional(),
+});
+
 // Export types for TypeScript
-export type RegisterInput = z.infer<typeof registerSchema>;
-export type LoginInput = z.infer<typeof loginSchema>;
+export type RegisterInput = z.infer<typeof registerBodySchema>;
+export type LoginInput = z.infer<typeof loginBodySchema>;

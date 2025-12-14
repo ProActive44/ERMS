@@ -82,7 +82,7 @@ const EmployeeList: React.FC = () => {
     }
   };
 
-  const canManage = user?.role === 'Admin' || user?.role === 'HR';
+  const canManage = user?.role === 'admin' || user?.role === 'hr';
 
   return (
     <div className="container mx-auto px-4 py-8">
