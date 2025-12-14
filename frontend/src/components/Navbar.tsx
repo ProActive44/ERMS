@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
 import { logout } from '../store/authSlice';
-import { Home, Users, LogOut, Menu, X } from 'lucide-react';
+import { Home, Users, LogOut, Menu, X, FolderKanban, Calendar, FileText } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
@@ -23,8 +23,9 @@ const Navbar: React.FC = () => {
   const navLinks = [
     { path: '/dashboard', label: 'Dashboard', icon: Home },
     { path: '/employees', label: 'Employees', icon: Users },
-    { path: '/attendance', label: 'Attendance', icon: Users },
-    { path: '/leaves', label: 'Leaves', icon: Users },
+    { path: '/attendance', label: 'Attendance', icon: Calendar },
+    { path: '/leaves', label: 'Leaves', icon: FileText },
+    { path: '/projects', label: 'Projects', icon: FolderKanban },
   ];
 
   return (

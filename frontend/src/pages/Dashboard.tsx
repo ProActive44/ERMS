@@ -82,16 +82,21 @@ const Dashboard: React.FC = () => {
               </p>
             </button>
 
-            <div className="bg-gray-100 p-6 rounded-lg shadow text-left opacity-50 cursor-not-allowed">
+            <button
+              onClick={() => navigate('/projects')}
+              className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition text-left"
+            >
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Projects
+                Projects & Tasks
               </h3>
-              <p className="text-gray-600">Coming soon...</p>
-            </div>
+              <p className="text-gray-600">
+                Manage projects, assign tasks, track progress, and collaborate with teams.
+              </p>
+            </button>
 
             <div className="bg-gray-100 p-6 rounded-lg shadow text-left opacity-50 cursor-not-allowed">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Tasks
+                Payroll
               </h3>
               <p className="text-gray-600">Coming soon...</p>
             </div>

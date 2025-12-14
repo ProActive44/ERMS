@@ -3,6 +3,8 @@ import authRoutes from './authRoutes';
 import employeeRoutes from './employeeRoutes';
 import attendanceRoutes from './attendanceRoutes';
 import leaveRoutes from './leaveRoutes';
+import projectRoutes from './projectRoutes';
+import taskRoutes from './taskRoutes';
 
 const router = Router();
 
@@ -23,11 +25,11 @@ router.use('/attendance', attendanceRoutes);
 // Leave routes
 router.use('/leaves', leaveRoutes);
 
-// API routes will be added here
-// Example:
-// router.use('/projects', projectRoutes);
-// router.use('/tasks', taskRoutes);
-// router.use('/dashboard', dashboardRoutes);
+// Project routes
+router.use('/projects', projectRoutes);
+
+// Task routes
+router.use('/tasks', taskRoutes);
 
 export default router;
 

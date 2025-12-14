@@ -16,6 +16,9 @@ import AttendanceList from './pages/Attendance/AttendanceList';
 import LeaveList from './pages/Leaves/LeaveList';
 import ApplyLeave from './pages/Leaves/ApplyLeave';
 import LeaveDetail from './pages/Leaves/LeaveDetail';
+import ProjectList from './pages/Projects/ProjectList';
+import ProjectDetail from './pages/Projects/ProjectDetail';
+import CreateProject from './pages/Projects/CreateProject';
 import './App.css';
 
 const AppContent: React.FC = () => {
@@ -39,6 +42,9 @@ const AppContent: React.FC = () => {
         <Route path="/leaves" element={<LeaveList />} />
         <Route path="/leaves/apply" element={<ApplyLeave />} />
         <Route path="/leaves/:id" element={<LeaveDetail />} />
+        <Route path="/projects" element={<ProjectList />} />
+        <Route path="/projects/new" element={<CreateProject />} />
+        <Route path="/projects/:id" element={<ProjectDetail />} />
       </Routes>
       <ToastContainer position="top-right" autoClose={3000} />
     </div>

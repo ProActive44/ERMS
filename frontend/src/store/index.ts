@@ -3,6 +3,8 @@ import authReducer from './authSlice';
 import employeeReducer from './employeeSlice';
 import attendanceReducer from './attendanceSlice';
 import leaveReducer from './leaveSlice';
+import projectReducer from './projectSlice';
+import taskReducer from './taskSlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +12,8 @@ export const store = configureStore({
     employees: employeeReducer,
     attendance: attendanceReducer,
     leave: leaveReducer,
+    project: projectReducer,
+    task: taskReducer,
   },
 });
 
