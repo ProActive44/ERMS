@@ -1,9 +1,10 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { store } from './store';
+import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -12,23 +13,33 @@ import EmployeeForm from './pages/Employees/EmployeeForm';
 import EmployeeDetail from './pages/Employees/EmployeeDetail';
 import './App.css';
 
+const AppContent: React.FC = () => {
+  const location = useLocation();
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+
+  return (
+    <div className="App min-h-screen bg-gray-50">
+      {!isAuthPage && <Navbar />}
+      <Routes>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/employees" element={<EmployeeList />} />
+        <Route path="/employees/new" element={<EmployeeForm />} />
+        <Route path="/employees/:id" element={<EmployeeDetail />} />
+        <Route path="/employees/:id/edit" element={<EmployeeForm />} />
+      </Routes>
+      <ToastContainer position="top-right" autoClose={3000} />
+    </div>
+  );
+};
+
 function App() {
   return (
     <Provider store={store}>
       <Router>
-        <div className="App">
-          <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/employees" element={<EmployeeList />} />
-            <Route path="/employees/new" element={<EmployeeForm />} />
-            <Route path="/employees/:id" element={<EmployeeDetail />} />
-            <Route path="/employees/:id/edit" element={<EmployeeForm />} />
-          </Routes>
-          <ToastContainer position="top-right" autoClose={3000} />
-        </div>
+        <AppContent />
       </Router>
     </Provider>
   );
