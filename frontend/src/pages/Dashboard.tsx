@@ -87,10 +87,22 @@ const Dashboard: React.FC = () => {
               className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition text-left"
             >
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Projects & Tasks
+                Projects
               </h3>
               <p className="text-gray-600">
-                Manage projects, assign tasks, track progress, and collaborate with teams.
+                Manage projects, track progress, and collaborate with teams.
+              </p>
+            </button>
+
+            <button
+              onClick={() => navigate('/tasks')}
+              className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition text-left"
+            >
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Task Board
+              </h3>
+              <p className="text-gray-600">
+                View and manage tasks with Kanban board, assign work, and track completion.
               </p>
             </button>
 

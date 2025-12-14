@@ -19,6 +19,9 @@ import LeaveDetail from './pages/Leaves/LeaveDetail';
 import ProjectList from './pages/Projects/ProjectList';
 import ProjectDetail from './pages/Projects/ProjectDetail';
 import CreateProject from './pages/Projects/CreateProject';
+import TaskBoard from './pages/Tasks/TaskBoard';
+import CreateTask from './pages/Tasks/CreateTask';
+import TaskDetail from './pages/Tasks/TaskDetail';
 import './App.css';
 
 const AppContent: React.FC = () => {
@@ -45,6 +48,9 @@ const AppContent: React.FC = () => {
         <Route path="/projects" element={<ProjectList />} />
         <Route path="/projects/new" element={<CreateProject />} />
         <Route path="/projects/:id" element={<ProjectDetail />} />
+        <Route path="/tasks" element={<TaskBoard />} />
+        <Route path="/tasks/new" element={<CreateTask />} />
+        <Route path="/tasks/:id" element={<TaskDetail />} />
       </Routes>
       <ToastContainer position="top-right" autoClose={3000} />
     </div>

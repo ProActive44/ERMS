@@ -1,17 +1,17 @@
+import { Clock, Eye, Filter, Plus, Search, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import {
-  fetchAttendance,
-  fetchTodayAttendance,
-  checkIn,
-  checkOut,
-  deleteAttendance,
-  setFilters,
+    checkIn,
+    checkOut,
+    deleteAttendance,
+    fetchAttendance,
+    fetchTodayAttendance,
+    setFilters,
 } from '../../store/attendanceSlice';
 import { fetchEmployees } from '../../store/employeeSlice';
-import { Clock, Plus, Search, Filter, Trash2, Eye, Calendar } from 'lucide-react';
-import { AttendanceFilters } from '../../types/attendance';
+import { AttendanceFilters, CheckInData } from '../../types/attendance';
 
 const AttendanceList: React.FC = () => {
   const navigate = useNavigate();
@@ -31,7 +31,7 @@ const AttendanceList: React.FC = () => {
 
   useEffect(() => {
     dispatch(fetchAttendance({ filters, page: pagination.page, limit: pagination.limit }));
-    dispatch(fetchEmployees({ filters: undefined, page: 1, limit: 100 }));
+    dispatch(fetchEmployees({ page: 1, limit: 100 }));
   }, [dispatch, filters, pagination.page, pagination.limit]);
 
   useEffect(() => {
@@ -47,9 +47,11 @@ const AttendanceList: React.FC = () => {
   const handleCheckIn = async () => {
     // If admin/hr and employee selected, check in for that employee
     // Otherwise, check in for current user (backend will find employee by userId)
-    const employeeId = canManage && selectedEmployeeForCheckIn ? selectedEmployeeForCheckIn : undefined;
+    const checkInData: CheckInData = canManage && selectedEmployeeForCheckIn 
+      ? { employeeId: selectedEmployeeForCheckIn }
+      : { employeeId: '' }; // Backend will use current user's employee record
     
-    await dispatch(checkIn({ employeeId }));
+    await dispatch(checkIn(checkInData));
     dispatch(fetchAttendance({ filters, page: pagination.page, limit: pagination.limit }));
     dispatch(fetchTodayAttendance('current'));
     setSelectedEmployeeForCheckIn('');
@@ -155,7 +157,7 @@ const AttendanceList: React.FC = () => {
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Select Employee</option>
-                {employees.employees?.map((emp) => (
+                {employees.map((emp) => (
                   <option key={emp._id} value={emp._id}>
                     {emp.employeeId} - {emp.firstName} {emp.lastName}
                   </option>
@@ -227,7 +229,7 @@ const AttendanceList: React.FC = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">All Employees</option>
-                {employees.employees?.map((emp) => (
+                {employees.map((emp) => (
                   <option key={emp._id} value={emp._id}>
                     {emp.firstName} {emp.lastName}
                   </option>
@@ -256,7 +258,7 @@ const AttendanceList: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
               <select
                 value={localFilters.status || ''}
-                onChange={(e) => setLocalFilters({ ...localFilters, status: e.target.value as any })}
+                onChange={(e) => setLocalFilters({ ...localFilters, status: (e.target.value || undefined) as 'Present' | 'Absent' | 'Half Day' | 'Late' | 'On Leave' | undefined })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">All Status</option>
