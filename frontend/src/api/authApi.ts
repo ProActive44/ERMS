@@ -38,6 +38,11 @@ export const authApi = {
     return response.data.data;
   },
 
+  refreshToken: async (refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> => {
+    const response = await apiClient.post('/auth/refresh-token', { refreshToken });
+    return response.data.data;
+  },
+
   getProfile: async () => {
     const response = await apiClient.get('/auth/profile');
     return response.data.data;

@@ -158,6 +158,70 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 };
 
 /**
+ * Refresh access token using refresh token
+ */
+export const refreshToken = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      const response: ApiResponse = {
+        status: 401,
+        success: false,
+        message: 'Refresh token is required',
+      };
+      res.status(401).json(response);
+      return;
+    }
+
+    // Verify refresh token
+    const { verifyRefreshToken, generateTokens } = require('../utils/jwt');
+    const decoded = verifyRefreshToken(refreshToken);
+
+    // Verify user still exists and is active
+    const user = await User.findById(decoded.userId);
+
+    if (!user || !user.isActive) {
+      const response: ApiResponse = {
+        status: 401,
+        success: false,
+        message: 'Invalid refresh token',
+      };
+      res.status(401).json(response);
+      return;
+    }
+
+    // Generate new tokens
+    const tokens = generateTokens({
+      userId: user._id.toString(),
+      email: user.email,
+      username: user.username,
+      role: user.role,
+    });
+
+    const response: ApiResponse = {
+      status: 200,
+      success: true,
+      message: 'Token refreshed successfully',
+      data: tokens,
+    };
+
+    res.status(200).json(response);
+  } catch (error: unknown) {
+    const axiosError = error as { message?: string };
+    const response: ApiResponse = {
+      status: 401,
+      success: false,
+      message: axiosError.message || 'Invalid or expired refresh token',
+    };
+    res.status(401).json(response);
+  }
+};
+
+/**
  * Get current user profile
  */
 export const getProfile = async (
@@ -187,11 +251,12 @@ export const getProfile = async (
     };
 
     res.status(200).json(response);
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const axiosError = error as { message?: string };
     const response: ApiResponse = {
       status: 500,
       success: false,
-      message: error.message || 'Error retrieving profile',
+      message: axiosError.message || 'Error retrieving profile',
     };
     res.status(500).json(response);
   }
