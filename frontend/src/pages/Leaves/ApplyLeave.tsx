@@ -23,7 +23,7 @@ const ApplyLeave: React.FC = () => {
     const newErrors: Partial<LeaveFormData> = {};
 
     if (!formData.leaveType) {
-      newErrors.leaveType = 'Leave type is required';
+      newErrors.leaveType = 'Required';
     }
 
     if (!formData.startDate) {

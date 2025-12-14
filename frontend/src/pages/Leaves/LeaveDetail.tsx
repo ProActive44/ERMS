@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import { fetchLeaveById, updateLeaveStatus, clearCurrentLeave } from '../../store/leaveSlice';
-import { ArrowLeft, Calendar, User, FileText, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
 
 const LeaveDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();

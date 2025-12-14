@@ -17,8 +17,6 @@ import {
   Eye,
   CheckCircle,
   XCircle,
-  Clock,
-  FileText,
 } from 'lucide-react';
 import { LeaveFilters } from '../../types/leave';
 

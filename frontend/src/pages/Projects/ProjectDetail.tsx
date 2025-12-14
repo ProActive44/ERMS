@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import {
   fetchProjectById,
-  updateProject,
   addTeamMember,
   removeTeamMember,
   updateProjectProgress,
@@ -14,10 +13,8 @@ import { fetchEmployees } from '../../store/employeeSlice';
 import {
   ArrowLeft,
   Edit,
-  Users,
   Calendar,
   DollarSign,
-  TrendingUp,
   Briefcase,
   Tag,
   Plus,

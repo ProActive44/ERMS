@@ -1,5 +1,5 @@
 import axios from './axios';
-import { Leave, LeaveFormData, LeaveFilters, LeaveBalance } from '../types/leave';
+import { LeaveFormData, LeaveFilters } from '../types/leave';
 
 export const leaveApi = {
   // Apply for leave

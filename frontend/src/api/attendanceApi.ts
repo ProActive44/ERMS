@@ -1,5 +1,5 @@
 import axios from './axios';
-import { Attendance, CheckInData, CheckOutData, AttendanceFormData, AttendanceFilters } from '../types/attendance';
+import { CheckInData, CheckOutData, AttendanceFormData, AttendanceFilters } from '../types/attendance';
 
 const API_URL = '/attendance';
 
