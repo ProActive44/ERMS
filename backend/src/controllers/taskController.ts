@@ -1,11 +1,11 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { AuthenticatedRequest } from '../middleware/auth';
 import { Task } from '../models/Task';
 import { Project } from '../models/Project';
 import { Employee } from '../models/Employee';
-import mongoose from 'mongoose';
 
 // Create Task
-export const createTask = async (req: Request, res: Response) => {
+export const createTask = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
   try {
     const {
       projectId,
@@ -58,13 +58,13 @@ export const createTask = async (req: Request, res: Response) => {
       status: status || 'To Do',
       priority,
       assignedTo,
-      assignedBy: req.user.userId,
+      assignedBy: req.user!.userId,
       dueDate,
       estimatedHours,
       tags: tags || [],
       dependencies: dependencies || [],
-      createdBy: req.user.userId,
-      updatedBy: req.user.userId,
+      createdBy: req.user!.userId,
+      updatedBy: req.user!.userId,
     });
 
     await task.save();
@@ -92,7 +92,7 @@ export const createTask = async (req: Request, res: Response) => {
 };
 
 // Get All Tasks
-export const getAllTasks = async (req: Request, res: Response) => {
+export const getAllTasks = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
   try {
     const {
       projectId,
@@ -116,7 +116,7 @@ export const getAllTasks = async (req: Request, res: Response) => {
     if (search) {
       filter.$text = { $search: search as string };
     }
-    if (overdue === true) {
+    if (overdue === 'true') {
       filter.dueDate = { $lt: new Date() };
       filter.status = { $ne: 'Completed' };
     }
@@ -159,7 +159,7 @@ export const getAllTasks = async (req: Request, res: Response) => {
 };
 
 // Get Task by ID
-export const getTaskById = async (req: Request, res: Response) => {
+export const getTaskById = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
 
@@ -192,10 +192,10 @@ export const getTaskById = async (req: Request, res: Response) => {
 };
 
 // Update Task
-export const updateTask = async (req: Request, res: Response) => {
+export const updateTask = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
-    const updateData = { ...req.body, updatedBy: req.user.userId };
+    const updateData = { ...req.body, updatedBy: req.user!.userId };
 
     // Verify assignee exists if being updated
     if (updateData.assignedTo) {
@@ -252,7 +252,7 @@ export const updateTask = async (req: Request, res: Response) => {
 };
 
 // Delete Task
-export const deleteTask = async (req: Request, res: Response) => {
+export const deleteTask = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
 
@@ -279,7 +279,7 @@ export const deleteTask = async (req: Request, res: Response) => {
 };
 
 // Update Task Status
-export const updateTaskStatus = async (req: Request, res: Response) => {
+export const updateTaskStatus = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -288,7 +288,7 @@ export const updateTaskStatus = async (req: Request, res: Response) => {
       id,
       {
         status,
-        updatedBy: req.user.userId,
+        updatedBy: req.user!.userId,
       },
       { new: true, runValidators: true }
     )
@@ -321,7 +321,7 @@ export const updateTaskStatus = async (req: Request, res: Response) => {
 };
 
 // Assign Task
-export const assignTask = async (req: Request, res: Response) => {
+export const assignTask = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
     const { assignedTo } = req.body;
@@ -338,8 +338,8 @@ export const assignTask = async (req: Request, res: Response) => {
       id,
       {
         assignedTo,
-        assignedBy: req.user.userId,
-        updatedBy: req.user.userId,
+        assignedBy: req.user!.userId,
+        updatedBy: req.user!.userId,
       },
       { new: true, runValidators: true }
     )
@@ -372,7 +372,7 @@ export const assignTask = async (req: Request, res: Response) => {
 };
 
 // Update Task Hours
-export const updateTaskHours = async (req: Request, res: Response) => {
+export const updateTaskHours = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
     const { actualHours } = req.body;
@@ -381,7 +381,7 @@ export const updateTaskHours = async (req: Request, res: Response) => {
       id,
       {
         actualHours,
-        updatedBy: req.user.userId,
+        updatedBy: req.user!.userId,
       },
       { new: true, runValidators: true }
     )
@@ -414,7 +414,7 @@ export const updateTaskHours = async (req: Request, res: Response) => {
 };
 
 // Get Tasks by Project
-export const getTasksByProject = async (req: Request, res: Response) => {
+export const getTasksByProject = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
   try {
     const { projectId } = req.params;
     const { status, assignedTo } = req.query;
@@ -453,7 +453,7 @@ export const getTasksByProject = async (req: Request, res: Response) => {
 };
 
 // Get Task Statistics
-export const getTaskStats = async (req: Request, res: Response) => {
+export const getTaskStats = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
   try {
     const { projectId } = req.query;
 

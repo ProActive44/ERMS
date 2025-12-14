@@ -7,7 +7,7 @@ import { ApiResponse } from '../types';
 export const notFoundHandler = (
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): void => {
   const response: ApiResponse = {
     status: 404,
@@ -22,9 +22,9 @@ export const notFoundHandler = (
  */
 export const errorHandler = (
   err: Error,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): void => {
   console.error('Error:', err);
 

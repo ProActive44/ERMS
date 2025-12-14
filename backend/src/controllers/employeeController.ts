@@ -383,7 +383,7 @@ export const deleteEmployee = async (
 
 // Get employee statistics
 export const getEmployeeStats = async (
-  req: AuthenticatedRequest,
+  _req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {

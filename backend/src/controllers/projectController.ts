@@ -1,10 +1,11 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { AuthenticatedRequest } from '../middleware/auth';
 import { Project } from '../models/Project';
 import { Employee } from '../models/Employee';
 import mongoose from 'mongoose';
 
 // Create Project
-export const createProject = async (req: Request, res: Response) => {
+export const createProject = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
   try {
     const {
       name,
@@ -52,8 +53,8 @@ export const createProject = async (req: Request, res: Response) => {
       budget,
       clientName,
       tags: tags || [],
-      createdBy: req.user.userId,
-      updatedBy: req.user.userId,
+      createdBy: req.user?.userId,
+      updatedBy: req.user?.userId,
     });
 
     await project.save();
@@ -79,7 +80,7 @@ export const createProject = async (req: Request, res: Response) => {
 };
 
 // Get All Projects
-export const getAllProjects = async (req: Request, res: Response) => {
+export const getAllProjects = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
   try {
     const {
       status,
@@ -137,7 +138,7 @@ export const getAllProjects = async (req: Request, res: Response) => {
 };
 
 // Get Project by ID
-export const getProjectById = async (req: Request, res: Response) => {
+export const getProjectById = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
 
@@ -168,10 +169,10 @@ export const getProjectById = async (req: Request, res: Response) => {
 };
 
 // Update Project
-export const updateProject = async (req: Request, res: Response) => {
+export const updateProject = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
-    const updateData = { ...req.body, updatedBy: req.user.userId };
+    const updateData = { ...req.body, updatedBy: req.user!.userId };
 
     // Verify project manager exists if being updated
     if (updateData.projectManagerId) {
@@ -228,7 +229,7 @@ export const updateProject = async (req: Request, res: Response) => {
 };
 
 // Delete Project
-export const deleteProject = async (req: Request, res: Response) => {
+export const deleteProject = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
 
@@ -255,7 +256,7 @@ export const deleteProject = async (req: Request, res: Response) => {
 };
 
 // Add Team Member to Project
-export const addTeamMember = async (req: Request, res: Response) => {
+export const addTeamMember = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
     const { employeeId } = req.body;
@@ -284,7 +285,7 @@ export const addTeamMember = async (req: Request, res: Response) => {
     }
 
     project.teamMembers.push(new mongoose.Types.ObjectId(employeeId));
-    project.updatedBy = new mongoose.Types.ObjectId(req.user.userId);
+    project.updatedBy = new mongoose.Types.ObjectId(req.user!.userId);
     await project.save();
 
     const updatedProject = await Project.findById(id)
@@ -308,7 +309,7 @@ export const addTeamMember = async (req: Request, res: Response) => {
 };
 
 // Remove Team Member from Project
-export const removeTeamMember = async (req: Request, res: Response) => {
+export const removeTeamMember = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
     const { employeeId } = req.body;
@@ -333,7 +334,7 @@ export const removeTeamMember = async (req: Request, res: Response) => {
     }
 
     project.teamMembers.splice(memberIndex, 1);
-    project.updatedBy = new mongoose.Types.ObjectId(req.user.userId);
+    project.updatedBy = new mongoose.Types.ObjectId(req.user!.userId);
     await project.save();
 
     const updatedProject = await Project.findById(id)
@@ -357,7 +358,7 @@ export const removeTeamMember = async (req: Request, res: Response) => {
 };
 
 // Update Project Progress
-export const updateProjectProgress = async (req: Request, res: Response) => {
+export const updateProjectProgress = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
     const { progress } = req.body;
@@ -366,7 +367,7 @@ export const updateProjectProgress = async (req: Request, res: Response) => {
       id,
       {
         progress,
-        updatedBy: req.user.userId,
+        updatedBy: req.user!.userId,
       },
       { new: true, runValidators: true }
     )
@@ -397,7 +398,7 @@ export const updateProjectProgress = async (req: Request, res: Response) => {
 };
 
 // Get Project Statistics
-export const getProjectStats = async (req: Request, res: Response) => {
+export const getProjectStats = async (_req: AuthenticatedRequest, res: Response): Promise<any> => {
   try {
     const totalProjects = await Project.countDocuments();
     const activeProjects = await Project.countDocuments({ status: 'In Progress' });

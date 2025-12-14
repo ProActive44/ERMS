@@ -9,7 +9,7 @@ import taskRoutes from './taskRoutes';
 const router = Router();
 
 // Health check route (already handled in server.ts, but can add here if needed)
-router.get('/health', (req, res) => {
+router.get('/health', (_req, res) => {
   res.json({ status: 'ok', message: 'ERMS API is running' });
 });
 
