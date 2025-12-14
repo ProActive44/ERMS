@@ -6,6 +6,8 @@ import {
   updateEmployee,
   deleteEmployee,
   getEmployeeStats,
+  manageEmployeeCredentials,
+  getEmployeeCredentials,
 } from '../controllers/employeeController';
 import { authenticateToken, requireRole } from '../middleware/auth';
 import { validate } from '../middleware/validate';
@@ -26,6 +28,9 @@ router.get('/stats', requireRole('admin', 'hr'), getEmployeeStats);
 // Get all employees with pagination and filters
 router.get('/', validate(getEmployeesQuerySchema), getAllEmployees);
 
+// Get employee credentials - Admin only (WORKAROUND for v1.0)
+router.get('/:id/credentials', requireRole('admin', 'hr'), getEmployeeCredentials);
+
 // Get employee by ID
 router.get('/:id', getEmployeeById);
 
@@ -36,6 +41,9 @@ router.post(
   validate(createEmployeeSchema),
   createEmployee
 );
+
+// Manage employee credentials - Admin only (WORKAROUND for v1.0)
+router.post('/:id/credentials', requireRole('admin', 'hr'), manageEmployeeCredentials);
 
 // Update employee - Admin/HR only
 router.put(

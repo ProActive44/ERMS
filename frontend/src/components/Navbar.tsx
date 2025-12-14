@@ -23,6 +23,8 @@ const Navbar: React.FC = () => {
   const navLinks = [
     { path: '/dashboard', label: 'Dashboard', icon: Home },
     { path: '/employees', label: 'Employees', icon: Users },
+    { path: '/attendance', label: 'Attendance', icon: Users },
+    { path: '/leaves', label: 'Leaves', icon: Users },
   ];
 
   return (

@@ -1,6 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { Employee } from '../models/Employee';
+import { User } from '../models/User';
 import { ApiResponse } from '../types';
 import mongoose from 'mongoose';
 
@@ -200,9 +201,34 @@ export const createEmployee = async (
       createdBy: req.user?.userId,
     });
 
+    // WORKAROUND: Automatically create User account for employee
+    // This will be replaced by the activation flow in v2.0
+    // Default password: Employee@123 (should be changed on first login)
+    try {
+      const defaultPassword = 'Employee@123';
+      const username = employeeData.email.split('@')[0]; // Extract username from email
+      
+      const newUser = await User.create({
+        email: employeeData.email,
+        username: username,
+        password: defaultPassword,
+        firstName: employeeData.firstName,
+        lastName: employeeData.lastName,
+        role: 'employee',
+      });
+
+      // Link employee to user
+      employee.userId = newUser._id;
+      await employee.save();
+    } catch (userError: any) {
+      // If user creation fails (e.g., email already exists), log but don't fail employee creation
+      console.error('Failed to create user account for employee:', userError.message);
+    }
+
     const populatedEmployee = await Employee.findById(employee._id)
       .populate('managerId', 'firstName lastName email')
       .populate('createdBy', 'firstName lastName email')
+      .populate('userId', 'email username role')
       .lean();
 
     const response: ApiResponse = {
@@ -403,6 +429,149 @@ export const getEmployeeStats = async (
       success: true,
       message: 'Employee statistics retrieved successfully',
       data: stats[0],
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Create or update employee login credentials (WORKAROUND)
+// NOTE: This is a temporary solution. Will be replaced by activation flow in v2.0
+export const manageEmployeeCredentials = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { username, password, email } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      res.status(400).json({
+        status: 400,
+        success: false,
+        message: 'Invalid employee ID',
+      });
+      return;
+    }
+
+    const employee = await Employee.findById(id);
+
+    if (!employee) {
+      res.status(404).json({
+        status: 404,
+        success: false,
+        message: 'Employee not found',
+      });
+      return;
+    }
+
+    let user;
+    const userEmail = email || employee.email;
+
+    // Check if employee already has a user account
+    if (employee.userId) {
+      // Update existing user
+      user = await User.findById(employee.userId);
+      
+      if (!user) {
+        res.status(404).json({
+          status: 404,
+          success: false,
+          message: 'User account not found',
+        });
+        return;
+      }
+
+      if (username) user.username = username;
+      if (email) user.email = email;
+      if (password) user.password = password; // Will be hashed by pre-save hook
+      
+      await user.save();
+    } else {
+      // Create new user account
+      const defaultUsername = username || employee.email.split('@')[0];
+      const defaultPassword = password || 'Employee@123';
+
+      // Check if user with this email already exists
+      const existingUser = await User.findOne({ email: userEmail });
+      
+      if (existingUser) {
+        res.status(400).json({
+          status: 400,
+          success: false,
+          message: 'User account with this email already exists',
+        });
+        return;
+      }
+
+      user = await User.create({
+        email: userEmail,
+        username: defaultUsername,
+        password: defaultPassword,
+        firstName: employee.firstName,
+        lastName: employee.lastName,
+        role: 'employee',
+      });
+
+      // Link employee to user
+      employee.userId = user._id;
+      await employee.save();
+    }
+
+    const response: ApiResponse = {
+      status: 200,
+      success: true,
+      message: employee.userId ? 'Credentials updated successfully' : 'Credentials created successfully',
+      data: {
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get employee credentials info (without password)
+export const getEmployeeCredentials = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      res.status(400).json({
+        status: 400,
+        success: false,
+        message: 'Invalid employee ID',
+      });
+      return;
+    }
+
+    const employee = await Employee.findById(id).populate('userId', 'email username role');
+
+    if (!employee) {
+      res.status(404).json({
+        status: 404,
+        success: false,
+        message: 'Employee not found',
+      });
+      return;
+    }
+
+    const response: ApiResponse = {
+      status: 200,
+      success: true,
+      message: 'Employee credentials retrieved successfully',
+      data: employee.userId || null,
     };
 
     res.status(200).json(response);

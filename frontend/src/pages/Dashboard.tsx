@@ -58,19 +58,29 @@ const Dashboard: React.FC = () => {
               </p>
             </button>
 
-            <div className="bg-gray-100 p-6 rounded-lg shadow text-left opacity-50 cursor-not-allowed">
+            <button
+              onClick={() => navigate('/attendance')}
+              className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition text-left"
+            >
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Attendance
               </h3>
-              <p className="text-gray-600">Coming soon...</p>
-            </div>
+              <p className="text-gray-600">
+                Track employee attendance, check-in/check-out times, and monitor work hours.
+              </p>
+            </button>
 
-            <div className="bg-gray-100 p-6 rounded-lg shadow text-left opacity-50 cursor-not-allowed">
+            <button
+              onClick={() => navigate('/leaves')}
+              className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition text-left"
+            >
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Leave Management
               </h3>
-              <p className="text-gray-600">Coming soon...</p>
-            </div>
+              <p className="text-gray-600">
+                Apply for leaves, manage leave requests, and track leave balances.
+              </p>
+            </button>
 
             <div className="bg-gray-100 p-6 rounded-lg shadow text-left opacity-50 cursor-not-allowed">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">

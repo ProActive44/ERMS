@@ -11,6 +11,11 @@ import Dashboard from './pages/Dashboard';
 import EmployeeList from './pages/Employees/EmployeeList';
 import EmployeeForm from './pages/Employees/EmployeeForm';
 import EmployeeDetail from './pages/Employees/EmployeeDetail';
+import EmployeeCredentials from './pages/Employees/EmployeeCredentials';
+import AttendanceList from './pages/Attendance/AttendanceList';
+import LeaveList from './pages/Leaves/LeaveList';
+import ApplyLeave from './pages/Leaves/ApplyLeave';
+import LeaveDetail from './pages/Leaves/LeaveDetail';
 import './App.css';
 
 const AppContent: React.FC = () => {
@@ -29,6 +34,11 @@ const AppContent: React.FC = () => {
         <Route path="/employees/new" element={<EmployeeForm />} />
         <Route path="/employees/:id" element={<EmployeeDetail />} />
         <Route path="/employees/:id/edit" element={<EmployeeForm />} />
+        <Route path="/employees/:id/credentials" element={<EmployeeCredentials />} />
+        <Route path="/attendance" element={<AttendanceList />} />
+        <Route path="/leaves" element={<LeaveList />} />
+        <Route path="/leaves/apply" element={<ApplyLeave />} />
+        <Route path="/leaves/:id" element={<LeaveDetail />} />
       </Routes>
       <ToastContainer position="top-right" autoClose={3000} />
     </div>

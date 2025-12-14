@@ -2,6 +2,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IEmployee extends Document {
   employeeId: string;
+  userId?: mongoose.Types.ObjectId;
   firstName: string;
   lastName: string;
   email: string;
@@ -45,6 +46,11 @@ const employeeSchema = new Schema<IEmployee>(
       required: true,
       unique: true,
       trim: true,
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: false,
     },
     firstName: {
       type: String,

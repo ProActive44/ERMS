@@ -47,7 +47,7 @@ const EmployeeDetail: React.FC = () => {
     }
   };
 
-  const canManage = user?.role === 'Admin' || user?.role === 'HR';
+  const canManage = user?.role === 'admin' || user?.role === 'hr';
 
   if (loading) {
     return (
@@ -106,6 +106,13 @@ const EmployeeDetail: React.FC = () => {
           </div>
           {canManage && (
             <div className="flex gap-2">
+              <button
+                onClick={() => navigate(`/employees/${id}/credentials`)}
+                className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition"
+              >
+                <Mail size={18} />
+                Credentials
+              </button>
               <button
                 onClick={() => navigate(`/employees/${id}/edit`)}
                 className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
