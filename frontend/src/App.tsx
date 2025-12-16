@@ -13,10 +13,16 @@ const AppContent: React.FC = () => {
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
 
   return (
-    <div className="App min-h-screen bg-gray-50">
+    <div className="App min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {!isAuthPage && <Navbar />}
       <AppRoutes />
-      <ToastContainer position="top-right" autoClose={3000} />
+      <ToastContainer 
+        position="top-right" 
+        autoClose={3000}
+        theme="light"
+        className="mt-16"
+        toastClassName="backdrop-blur-md bg-white/90 shadow-lg"
+      />
     </div>
   );
 };
