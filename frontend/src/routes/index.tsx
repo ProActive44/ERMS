@@ -8,6 +8,8 @@ import LeaveRoutes from './LeaveRoutes';
 import ProjectRoutes from './ProjectRoutes';
 import TaskRoutes from './TaskRoutes';
 import ReportRoutes from './ReportRoutes';
+import PrivateRoute from './PrivateRoute';
+import Profile from '../pages/Profile';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -21,6 +23,7 @@ const AppRoutes: React.FC = () => {
       {ProjectRoutes()}
       {TaskRoutes()}
       {ReportRoutes()}
+      <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
     </Routes>
   );
 };

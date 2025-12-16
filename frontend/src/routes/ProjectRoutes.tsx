@@ -3,6 +3,7 @@ import PrivateRoute from './PrivateRoute';
 import ProjectList from '../pages/Projects/ProjectList';
 import ProjectDetail from '../pages/Projects/ProjectDetail';
 import CreateProject from '../pages/Projects/CreateProject';
+import EditProject from '../pages/Projects/EditProject';
 
 const ProjectRoutes = () => {
   return (
@@ -20,6 +21,14 @@ const ProjectRoutes = () => {
         element={
           <PrivateRoute>
             <CreateProject />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/projects/:id/edit"
+        element={
+          <PrivateRoute>
+            <EditProject />
           </PrivateRoute>
         }
       />

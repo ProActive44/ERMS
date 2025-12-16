@@ -62,10 +62,10 @@ export const dashboardApi = {
         rejected: findCount(leaveStats.data.data.statusCount, 'Rejected'),
       },
       projects: {
-        total: projectStats.data.data.totalCount || 0,
-        active: findCount(projectStats.data.data.statusCount, 'In Progress'),
-        completed: findCount(projectStats.data.data.statusCount, 'Completed'),
-        byStatus: projectStats.data.data.statusCount || [],
+        total: projectStats.data.data.totalProjects || 0,
+        active: projectStats.data.data.activeProjects || 0,
+        completed: projectStats.data.data.completedProjects || 0,
+        byStatus: projectStats.data.data.projectsByStatus || [],
       },
     };
   },

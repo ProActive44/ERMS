@@ -17,6 +17,7 @@ import {
   Users,
   Calendar,
   TrendingUp,
+  Edit,
 } from 'lucide-react';
 import { ProjectFilters } from '../../types/project';
 
@@ -384,6 +385,17 @@ const ProjectList: React.FC = () => {
                       <Eye size={16} />
                       View
                     </button>
+                    {canManage && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/projects/${project._id}/edit`);
+                        }}
+                        className="px-3 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition"
+                      >
+                        <Edit size={16} />
+                      </button>
+                    )}
                     {user?.role === 'admin' && (
                       <button
                         onClick={(e) => handleDelete(project._id, e)}

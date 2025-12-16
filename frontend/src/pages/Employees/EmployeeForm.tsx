@@ -98,6 +98,10 @@ const EmployeeForm: React.FC = () => {
     }),
   });
 
+  const handleFillTestData = () => {
+    formik.setValues(dummyData);
+  };
+
   const formik = useFormik<EmployeeFormData>({
     initialValues: isEdit && currentEmployee ? {
       employeeId: currentEmployee.employeeId,
@@ -126,7 +130,34 @@ const EmployeeForm: React.FC = () => {
         relationship: currentEmployee.emergencyContact.relationship,
         phone: currentEmployee.emergencyContact.phone,
       },
-    } : dummyData,
+    } : {
+      employeeId: '',
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      dateOfBirth: '',
+      gender: 'Male',
+      address: {
+        street: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        country: '',
+      },
+      department: '',
+      designation: '',
+      joiningDate: '',
+      employmentType: 'Full-Time',
+      salary: 0,
+      managerId: '',
+      status: 'Active',
+      emergencyContact: {
+        name: '',
+        relationship: '',
+        phone: '',
+      },
+    },
     validationSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
@@ -155,9 +186,20 @@ const EmployeeForm: React.FC = () => {
           <ArrowLeft size={20} />
           Back to Employees
         </button>
-        <h1 className="text-3xl font-bold text-gray-900">
-          {isEdit ? 'Edit Employee' : 'Add New Employee'}
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-gray-900">
+            {isEdit ? 'Edit Employee' : 'Add New Employee'}
+          </h1>
+          {!isEdit && (
+            <button
+              type="button"
+              onClick={handleFillTestData}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm font-medium"
+            >
+              Fill Test Data
+            </button>
+          )}
+        </div>
       </div>
 
       <form onSubmit={formik.handleSubmit} className="bg-white rounded-lg shadow-md p-6">
@@ -421,8 +463,7 @@ const EmployeeForm: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Department *
               </label>
-              <input
-                type="text"
+              <select
                 name="department"
                 value={formik.values.department}
                 onChange={formik.handleChange}
@@ -432,7 +473,21 @@ const EmployeeForm: React.FC = () => {
                     ? 'border-red-500'
                     : 'border-gray-300'
                 }`}
-              />
+              >
+                <option value="">Select Department</option>
+                <option value="Engineering">Engineering</option>
+                <option value="Human Resources">Human Resources</option>
+                <option value="Sales">Sales</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Finance">Finance</option>
+                <option value="Operations">Operations</option>
+                <option value="Customer Support">Customer Support</option>
+                <option value="Product">Product</option>
+                <option value="Design">Design</option>
+                <option value="Quality Assurance">Quality Assurance</option>
+                <option value="Legal">Legal</option>
+                <option value="Administration">Administration</option>
+              </select>
               {formik.touched.department && formik.errors.department && (
                 <p className="text-red-500 text-sm mt-1">{formik.errors.department}</p>
               )}

@@ -464,7 +464,8 @@ export const getAttendanceStats = async (
       matchStage.employeeId = employeeId;
     }
 
-    const stats = await Attendance.aggregate([
+    // Get status count for all records
+    const statusCount = await Attendance.aggregate([
       { $match: matchStage },
       {
         $group: {
@@ -475,6 +476,31 @@ export const getAttendanceStats = async (
       },
     ]);
 
+    // Get today's statistics
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const todayStats = await Attendance.aggregate([
+      {
+        $match: {
+          date: { $gte: today, $lt: tomorrow },
+        },
+      },
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const totalEmployees = await Employee.countDocuments({ status: 'Active' });
+    const todayPresent = todayStats.find(s => s._id === 'Present')?.count || 0;
+    const todayAbsent = totalEmployees - todayPresent;
+    const attendanceRate = totalEmployees > 0 ? (todayPresent / totalEmployees) * 100 : 0;
+
     const totalRecords = await Attendance.countDocuments(matchStage);
 
     const response: ApiResponse = {
@@ -482,8 +508,14 @@ export const getAttendanceStats = async (
       success: true,
       message: 'Attendance statistics retrieved successfully',
       data: {
-        stats,
+        stats: statusCount,
         total: totalRecords,
+        todayStats: {
+          present: todayPresent,
+          absent: todayAbsent,
+        },
+        attendanceRate,
+        statusCount,
       },
     };
     res.status(200).json(response);

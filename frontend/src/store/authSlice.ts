@@ -81,6 +81,29 @@ export const fetchProfile = createAsyncThunk(
   }
 );
 
+export const updateUserProfile = createAsyncThunk(
+  'auth/updateProfile',
+  async (
+    data: {
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+      username?: string;
+    },
+    { rejectWithValue }
+  ) => {
+    try {
+      const user = await authApi.updateProfile(data);
+      return user;
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      return rejectWithValue(
+        axiosError.response?.data?.message || 'Failed to update profile'
+      );
+    }
+  }
+);
+
 export const logoutUser = createAsyncThunk(
   'auth/logout',
   async (_, { rejectWithValue }) => {
@@ -165,15 +188,32 @@ const authSlice = createSlice({
         state.user = null;
         localStorage.removeItem('accessToken');
         localStorage.removeItem('user');
-      })
-      // Logout
-      .addCase(logoutUser.fulfilled, (state) => {
-        state.user = null;
-        state.accessToken = null;
-        state.isAuthenticated = false;
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('user');
       });
+
+    // Update Profile
+    builder
+      .addCase(updateUserProfile.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateUserProfile.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload;
+        localStorage.setItem('user', JSON.stringify(action.payload));
+      })
+      .addCase(updateUserProfile.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      });
+
+    // Logout
+    builder.addCase(logoutUser.fulfilled, (state) => {
+      state.user = null;
+      state.accessToken = null;
+      state.isAuthenticated = false;
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('user');
+    });
   },
 });
 

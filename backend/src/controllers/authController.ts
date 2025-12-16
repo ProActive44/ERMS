@@ -395,3 +395,97 @@ export const logout = async (
   }
 };
 
+/**
+ * Update user profile
+ */
+export const updateProfile = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    
+    if (!userId) {
+      const response: ApiResponse = {
+        status: 401,
+        success: false,
+        message: 'Unauthorized',
+      };
+      res.status(401).json(response);
+      return;
+    }
+
+    const { firstName, lastName, email, username } = req.body;
+
+    // Check if email or username is being changed to an existing one
+    if (email || username) {
+      const existingUser = await User.findOne({
+        _id: { $ne: userId },
+        $or: [
+          ...(email ? [{ email }] : []),
+          ...(username ? [{ username }] : []),
+        ],
+      });
+
+      if (existingUser) {
+        const response: ApiResponse = {
+          status: 400,
+          success: false,
+          message:
+            existingUser.email === email
+              ? 'Email already in use'
+              : 'Username already taken',
+        };
+        res.status(400).json(response);
+        return;
+      }
+    }
+
+    // Update user
+    const updateData: any = {};
+    if (firstName !== undefined) updateData.firstName = firstName;
+    if (lastName !== undefined) updateData.lastName = lastName;
+    if (email !== undefined) updateData.email = email;
+    if (username !== undefined) updateData.username = username;
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    ).select('-password -refreshTokens');
+
+    if (!user) {
+      const response: ApiResponse = {
+        status: 404,
+        success: false,
+        message: 'User not found',
+      };
+      res.status(404).json(response);
+      return;
+    }
+
+    const response: ApiResponse = {
+      status: 200,
+      success: true,
+      message: 'Profile updated successfully',
+      data: {
+        _id: user._id,
+        email: user.email,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+      },
+    };
+
+    res.status(200).json(response);
+  } catch (error: any) {
+    const response: ApiResponse = {
+      status: 500,
+      success: false,
+      message: error.message || 'Error updating profile',
+    };
+    res.status(500).json(response);
+  }
+};
+
