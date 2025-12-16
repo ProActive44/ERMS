@@ -109,10 +109,32 @@ export const getAllTasks = async (req: AuthenticatedRequest, res: Response): Pro
 
     const filter: any = {};
 
+    // For regular employees, only show tasks assigned to them
+    const userRole = req.user?.role;
+    if (userRole === 'employee') {
+      const employee = await Employee.findOne({ userId: req.user?.userId });
+      if (employee) {
+        filter.assignedTo = employee._id;
+      } else {
+        // No employee record, return empty
+        return res.json({
+          success: true,
+          data: [],
+          pagination: {
+            total: 0,
+            page: Number(page),
+            limit: Number(limit),
+            totalPages: 0,
+          },
+        });
+      }
+    }
+
     if (projectId) filter.projectId = projectId;
     if (status) filter.status = status;
     if (priority) filter.priority = priority;
-    if (assignedTo) filter.assignedTo = assignedTo;
+    // Only allow admin/HR to filter by assignedTo (employees already have this set)
+    if (assignedTo && userRole !== 'employee') filter.assignedTo = assignedTo;
     if (search) {
       filter.$text = { $search: search as string };
     }
@@ -458,6 +480,30 @@ export const getTaskStats = async (req: AuthenticatedRequest, res: Response): Pr
     const { projectId } = req.query;
 
     const filter: any = {};
+    
+    // For regular employees, only count their assigned tasks
+    const userRole = req.user?.role;
+    if (userRole === 'employee') {
+      const employee = await Employee.findOne({ userId: req.user?.userId });
+      if (employee) {
+        filter.assignedTo = employee._id;
+      } else {
+        // No employee record, return zeros
+        return res.json({
+          success: true,
+          data: {
+            totalTasks: 0,
+            completedTasks: 0,
+            inProgressTasks: 0,
+            blockedTasks: 0,
+            overdueTasks: 0,
+            tasksByStatus: [],
+            tasksByPriority: [],
+          },
+        });
+      }
+    }
+    
     if (projectId) filter.projectId = projectId;
 
     const totalTasks = await Task.countDocuments(filter);

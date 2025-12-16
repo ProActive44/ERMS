@@ -48,7 +48,7 @@ const Navbar: React.FC = () => {
     return location.pathname === path || location.pathname.startsWith(path + '/');
   };
 
-  const navLinks = [
+  const allNavLinks = [
     { path: '/dashboard', label: 'Dashboard', icon: Home },
     { path: '/employees', label: 'Employees', icon: Users },
     { path: '/attendance', label: 'Attendance', icon: Calendar },
@@ -57,6 +57,11 @@ const Navbar: React.FC = () => {
     { path: '/tasks', label: 'Tasks', icon: FolderKanban },
     { path: '/reports', label: 'Reports', icon: FileText },
   ];
+
+  // Filter out Reports for employees
+  const navLinks = user?.role === 'employee' 
+    ? allNavLinks.filter(link => link.path !== '/reports')
+    : allNavLinks;
 
   return (
     <>

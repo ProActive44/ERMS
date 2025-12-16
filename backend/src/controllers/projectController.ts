@@ -121,7 +121,8 @@ export const getAllProjects = async (req: AuthenticatedRequest, res: Response): 
 
     if (status) filter.status = status;
     if (priority) filter.priority = priority;
-    if (projectManagerId) filter.projectManager = projectManagerId;
+    // Only allow admin/HR to filter by projectManager (conflicts with employee $or condition)
+    if (projectManagerId && userRole !== 'employee') filter.projectManager = projectManagerId;
     if (search) {
       filter.$text = { $search: search as string };
     }

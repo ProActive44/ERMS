@@ -108,13 +108,15 @@ const Dashboard: React.FC = () => {
               </h2>
               <p className="text-gray-600 text-lg">Here's what's happening with your workspace today.</p>
             </div>
-            <button
-              onClick={handleExportStats}
-              className="btn-primary flex items-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-            >
-              <Download size={18} />
-              Export Report
-            </button>
+            {user.role !== 'employee' && (
+              <button
+                onClick={handleExportStats}
+                className="btn-primary flex items-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              >
+                <Download size={18} />
+                Export Report
+              </button>
+            )}
           </div>
 
           {/* Employee Welcome Message */}

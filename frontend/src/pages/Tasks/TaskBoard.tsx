@@ -21,9 +21,12 @@ const TaskBoard: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [searchParams] = useSearchParams();
+  const { user } = useAppSelector((state) => state.auth);
   const { tasks, loading } = useAppSelector((state) => state.task);
   const { projects } = useAppSelector((state) => state.project);
   const { employees } = useAppSelector((state) => state.employees);
+
+  const canManage = user?.role === 'admin' || user?.role === 'hr';
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProject, setSelectedProject] = useState<string>(
@@ -169,18 +172,22 @@ const TaskBoard: React.FC = () => {
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">Task Board</h1>
+            <h1 className="text-3xl font-bold text-gray-800">
+              {canManage ? 'Task Board' : 'My Tasks'}
+            </h1>
             <p className="text-gray-600 mt-1">
-              Manage and track tasks across projects
+              {canManage ? 'Manage and track tasks across projects' : 'View and manage your assigned tasks'}
             </p>
           </div>
-          <button
-            onClick={() => navigate('/tasks/new')}
-            className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
-          >
-            <Plus size={20} />
-            New Task
-          </button>
+          {canManage && (
+            <button
+              onClick={() => navigate('/tasks/new')}
+              className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+            >
+              <Plus size={20} />
+              New Task
+            </button>
+          )}
         </div>
 
         {/* Search and Filters */}
