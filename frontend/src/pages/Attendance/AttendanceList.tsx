@@ -1,4 +1,4 @@
-import { Clock, Eye, Filter, Plus, Search, Trash2 } from 'lucide-react';
+import { Clock, Eye, Filter, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
@@ -368,6 +368,15 @@ const AttendanceList: React.FC = () => {
                         >
                           <Eye size={18} />
                         </button>
+                        {canManage && (
+                          <button
+                            onClick={() => navigate(`/attendance/edit/${record._id}`)}
+                            className="text-indigo-600 hover:text-indigo-900"
+                            title="Edit"
+                          >
+                            <Pencil size={18} />
+                          </button>
+                        )}
                         {!record.checkOut && (
                           <button
                             onClick={() => handleCheckOut(record._id)}

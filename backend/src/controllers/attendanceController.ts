@@ -327,12 +327,22 @@ export const createAttendance = async (
       data: populatedAttendance,
     };
     res.status(201).json(response);
-  } catch (error: unknown) {
-    const err = error as Error;
+  } catch (error: any) {
+    // Handle MongoDB duplicate key error
+    if (error.code === 11000) {
+      const response: ApiResponse = {
+        status: 409,
+        success: false,
+        message: 'An attendance record already exists for this employee on this date',
+      };
+      res.status(409).json(response);
+      return;
+    }
+
     const response: ApiResponse = {
       status: 500,
       success: false,
-      message: err.message || 'Failed to create attendance record',
+      message: error.message || 'Failed to create attendance record',
     };
     res.status(500).json(response);
   }
