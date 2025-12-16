@@ -48,7 +48,7 @@ const ProjectList: React.FC = () => {
     dispatch(setFilters({ ...localFilters, search: searchTerm }));
   };
 
-  const handleFilterChange = (key: keyof ProjectFilters, value: any) => {
+  const handleFilterChange = (key: keyof ProjectFilters, value: ProjectFilters[keyof ProjectFilters]) => {
     setLocalFilters({ ...localFilters, [key]: value });
   };
 

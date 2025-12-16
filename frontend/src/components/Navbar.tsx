@@ -61,7 +61,7 @@ const Navbar: React.FC = () => {
         <div className="flex items-center h-[72px] relative">
           {/* Logo/Brand */}
           <div className="flex items-center flex-shrink-0">
-            <Link to="/dashboard" className="flex items-center group focus:outline-none">
+            <Link to="/dashboard" className="flex items-center group focus:outline-none focus:ring-0">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary-500 via-purple-500 to-secondary-500 rounded-2xl blur-md opacity-60 group-hover:opacity-90 transition-all duration-500"></div>
                 <div className="relative bg-gradient-to-br from-primary-600 via-purple-600 to-secondary-600 text-white font-extrabold text-2xl px-6 py-3 rounded-2xl shadow-lg transform group-hover:scale-105 group-hover:shadow-xl transition-all duration-500 flex items-center space-x-2.5">
@@ -78,7 +78,7 @@ const Navbar: React.FC = () => {
               <Link
                 key={path}
                 to={path}
-                className={`group relative flex items-center space-x-2.5 px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 focus:outline-none ${
+                className={`group relative flex items-center space-x-2.5 px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 focus:outline-none focus:ring-0 ${
                   isActive(path)
                     ? 'text-white shadow-md'
                     : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50'
@@ -108,7 +108,7 @@ const Navbar: React.FC = () => {
               <div className="relative" ref={profileMenuRef}>
                 <button
                   onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                  className="flex items-center space-x-2 px-3 py-2 rounded-2xl bg-gradient-to-r from-gray-50 via-blue-50 to-indigo-50 border border-gray-200/60 shadow-sm hover:shadow-md transition-all duration-300 focus:outline-none group"
+                  className="flex items-center space-x-2 px-3 py-2 rounded-2xl bg-gradient-to-r from-gray-50 via-blue-50 to-indigo-50 border border-gray-200/60 shadow-sm hover:shadow-md transition-all duration-300 focus:outline-none focus:ring-0 group"
                 >
                   <div className="relative">
                     <div className="absolute inset-0 bg-gradient-to-br from-primary-400 to-secondary-400 rounded-full blur-sm opacity-50"></div>
@@ -145,7 +145,7 @@ const Navbar: React.FC = () => {
                           setProfileMenuOpen(false);
                           navigate('/profile');
                         }}
-                        className="w-full flex items-center space-x-3 px-5 py-3 text-gray-700 hover:bg-gradient-to-r hover:from-primary-50 hover:to-secondary-50 hover:text-primary-700 transition-all duration-200 focus:outline-none group"
+                        className="w-full flex items-center space-x-3 px-5 py-3 text-gray-700 hover:bg-gradient-to-r hover:from-primary-50 hover:to-secondary-50 hover:text-primary-700 transition-all duration-200 focus:outline-none focus:ring-0 group"
                       >
                         <User size={20} className="text-gray-500 group-hover:text-primary-600 transition-colors" />
                         <span className="font-semibold text-[15px]">My Profile</span>
@@ -156,7 +156,7 @@ const Navbar: React.FC = () => {
                           setProfileMenuOpen(false);
                           handleLogout();
                         }}
-                        className="w-full flex items-center space-x-3 px-5 py-3 text-red-600 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 transition-all duration-200 focus:outline-none group"
+                        className="w-full flex items-center space-x-3 px-5 py-3 text-red-600 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 transition-all duration-200 focus:outline-none focus:ring-0 group"
                       >
                         <LogOut size={20} className="group-hover:rotate-12 transition-transform duration-300" />
                         <span className="font-semibold text-[15px]">Logout</span>
@@ -172,7 +172,7 @@ const Navbar: React.FC = () => {
           <div className="lg:hidden ml-auto">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-primary-50 hover:to-secondary-50 hover:text-primary-600 transition-all duration-300 focus:outline-none shadow-sm hover:shadow-md border border-transparent hover:border-primary-200"
+              className="p-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-primary-50 hover:to-secondary-50 hover:text-primary-600 transition-all duration-300 focus:outline-none focus:ring-0 shadow-sm hover:shadow-md border border-transparent hover:border-primary-200"
             >
               {mobileMenuOpen ? <X size={26} /> : <Menu size={26} />}
             </button>
@@ -189,7 +189,7 @@ const Navbar: React.FC = () => {
                 key={path}
                 to={path}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center space-x-3 px-5 py-3.5 rounded-xl font-semibold transition-all duration-300 focus:outline-none ${
+                className={`flex items-center space-x-3 px-5 py-3.5 rounded-xl font-semibold transition-all duration-300 focus:outline-none focus:ring-0 ${
                   isActive(path)
                     ? 'bg-gradient-to-r from-primary-600 via-purple-600 to-secondary-600 text-white shadow-md'
                     : 'text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 hover:text-primary-600'
@@ -226,7 +226,7 @@ const Navbar: React.FC = () => {
                     setMobileMenuOpen(false);
                     navigate('/profile');
                   }}
-                  className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-gray-700 hover:bg-white hover:text-primary-600 transition-all duration-300 focus:outline-none"
+                  className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-gray-700 hover:bg-white hover:text-primary-600 transition-all duration-300 focus:outline-none focus:ring-0"
                 >
                   <User size={20} className="text-gray-500" />
                   <span className="text-[15px]">My Profile</span>
@@ -236,7 +236,7 @@ const Navbar: React.FC = () => {
                     setMobileMenuOpen(false);
                     handleLogout();
                   }}
-                  className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-red-600 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 transition-all duration-300 focus:outline-none"
+                  className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-red-600 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 transition-all duration-300 focus:outline-none focus:ring-0"
                 >
                   <LogOut size={20} />
                   <span className="text-[15px]">Logout</span>

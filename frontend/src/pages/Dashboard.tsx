@@ -238,7 +238,7 @@ const Dashboard: React.FC = () => {
                         dataKey="count"
                         nameKey="_id"
                       >
-                        {stats.projects.byStatus.map((entry, index) => (
+                        {stats.projects.byStatus.map((_, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
