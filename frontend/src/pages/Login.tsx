@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
 import { loginUser, clearError } from '../store/authSlice';
 
@@ -28,6 +29,13 @@ const Login: React.FC = () => {
     };
   }, [dispatch]);
 
+  // Show toast notification when error changes
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -40,7 +48,12 @@ const Login: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(loginUser(formData));
+    const result = await dispatch(loginUser(formData));
+    
+    // Show success toast if login is successful
+    if (loginUser.fulfilled.match(result)) {
+      toast.success('Login successful! Welcome back.');
+    }
   };
 
   return (

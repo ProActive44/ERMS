@@ -3,15 +3,15 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import {
-    checkIn,
-    checkOut,
-    deleteAttendance,
-    fetchAttendance,
-    fetchTodayAttendance,
-    setFilters,
+  checkIn,
+  checkOut,
+  deleteAttendance,
+  fetchAttendance,
+  fetchTodayAttendance,
+  setFilters,
 } from '../../store/attendanceSlice';
 import { fetchEmployees } from '../../store/employeeSlice';
-import { AttendanceFilters, CheckInData } from '../../types/attendance';
+import { AttendanceFilters } from '../../types/attendance';
 
 const AttendanceList: React.FC = () => {
   const navigate = useNavigate();
@@ -25,7 +25,9 @@ const AttendanceList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [localFilters, setLocalFilters] = useState<AttendanceFilters>(filters);
-  const [selectedEmployeeForCheckIn, setSelectedEmployeeForCheckIn] = useState('');
+  const [selectedEmployeesForCheckIn, setSelectedEmployeesForCheckIn] = useState<string[]>([]);
+  const [showEmployeeSelector, setShowEmployeeSelector] = useState(false);
+  const [employeeSearchTerm, setEmployeeSearchTerm] = useState('');
 
   const canManage = user?.role === 'admin' || user?.role === 'hr';
 
@@ -45,17 +47,35 @@ const AttendanceList: React.FC = () => {
   };
 
   const handleCheckIn = async () => {
-    // If admin/hr and employee selected, check in for that employee
-    // Otherwise, check in for current user (backend will find employee by userId)
-    const checkInData: CheckInData = canManage && selectedEmployeeForCheckIn 
-      ? { employeeId: selectedEmployeeForCheckIn }
-      : { employeeId: '' }; // Backend will use current user's employee record
+    if (canManage && selectedEmployeesForCheckIn.length > 0) {
+      // Check in multiple employees
+      for (const employeeId of selectedEmployeesForCheckIn) {
+        await dispatch(checkIn({ employeeId }));
+      }
+      setSelectedEmployeesForCheckIn([]);
+      setShowEmployeeSelector(false);
+    } else {
+      // Check in current user
+      await dispatch(checkIn({ employeeId: '' }));
+    }
     
-    await dispatch(checkIn(checkInData));
     dispatch(fetchAttendance({ filters, page: pagination.page, limit: pagination.limit }));
     dispatch(fetchTodayAttendance('current'));
-    setSelectedEmployeeForCheckIn('');
   };
+
+  const toggleEmployeeSelection = (employeeId: string) => {
+    setSelectedEmployeesForCheckIn(prev =>
+      prev.includes(employeeId)
+        ? prev.filter(id => id !== employeeId)
+        : [...prev, employeeId]
+    );
+  };
+
+  const filteredEmployees = employees.filter(emp =>
+    `${emp.firstName} ${emp.lastName} ${emp.employeeId}`
+      .toLowerCase()
+      .includes(employeeSearchTerm.toLowerCase())
+  );
 
   const handleCheckOut = async (id: string) => {
     if (confirm('Are you sure you want to check out?')) {
@@ -150,27 +170,91 @@ const AttendanceList: React.FC = () => {
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Check-in</h2>
           {canManage ? (
-            <div className="flex gap-4">
-              <select
-                value={selectedEmployeeForCheckIn}
-                onChange={(e) => setSelectedEmployeeForCheckIn(e.target.value)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">Select Employee</option>
-                {employees.map((emp) => (
-                  <option key={emp._id} value={emp._id}>
-                    {emp.employeeId} - {emp.firstName} {emp.lastName}
-                  </option>
-                ))}
-              </select>
-              <button
-                onClick={handleCheckIn}
-                disabled={!selectedEmployeeForCheckIn || loading}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                <Clock size={20} />
-                Check In
-              </button>
+            <div>
+              <div className="flex gap-4 mb-4">
+                <button
+                  onClick={() => setShowEmployeeSelector(!showEmployeeSelector)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-left flex items-center justify-between"
+                >
+                  <span className="text-gray-700">
+                    {selectedEmployeesForCheckIn.length === 0
+                      ? 'Select Employees'
+                      : `${selectedEmployeesForCheckIn.length} employee(s) selected`}
+                  </span>
+                  <svg
+                    className={`w-5 h-5 text-gray-400 transition-transform ${showEmployeeSelector ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                <button
+                  onClick={handleCheckIn}
+                  disabled={selectedEmployeesForCheckIn.length === 0 || loading}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <Clock size={20} />
+                  Check In ({selectedEmployeesForCheckIn.length})
+                </button>
+              </div>
+              
+              {/* Employee Selector Dropdown */}
+              {showEmployeeSelector && (
+                <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                  <div className="mb-3">
+                    <input
+                      type="text"
+                      placeholder="Search employees..."
+                      value={employeeSearchTerm}
+                      onChange={(e) => setEmployeeSearchTerm(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div className="max-h-64 overflow-y-auto space-y-2">
+                    {filteredEmployees.length === 0 ? (
+                      <p className="text-sm text-gray-500 text-center py-4">No employees found</p>
+                    ) : (
+                      filteredEmployees.map((emp) => (
+                        <label
+                          key={emp._id}
+                          className="flex items-center gap-3 p-2 hover:bg-white rounded-lg cursor-pointer transition"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedEmployeesForCheckIn.includes(emp._id)}
+                            onChange={() => toggleEmployeeSelection(emp._id)}
+                            className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                          />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-900">
+                              {emp.firstName} {emp.lastName}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {emp.employeeId} - {emp.department}
+                            </p>
+                          </div>
+                        </label>
+                      ))
+                    )}
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-gray-200 flex gap-2">
+                    <button
+                      onClick={() => setSelectedEmployeesForCheckIn(filteredEmployees.map(e => e._id))}
+                      className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    >
+                      Select All
+                    </button>
+                    <button
+                      onClick={() => setSelectedEmployeesForCheckIn([])}
+                      className="text-sm text-gray-600 hover:text-gray-700 font-medium"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <button
