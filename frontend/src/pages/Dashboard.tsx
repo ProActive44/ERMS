@@ -117,8 +117,33 @@ const Dashboard: React.FC = () => {
             </button>
           </div>
 
+          {/* Employee Welcome Message */}
+          {user.role === 'employee' && (
+            <div className="mb-8 card-gradient p-8 animate-scale-in">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-4 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-2xl shadow-lg">
+                  <Users className="text-white" size={32} />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900">Employee Portal</h3>
+                  <p className="text-gray-600">Access your personalized workspace</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-sm text-blue-600 font-semibold mb-1">Quick Access</p>
+                  <p className="text-xs text-gray-600">View your projects, tasks, and attendance records</p>
+                </div>
+                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                  <p className="text-sm text-green-600 font-semibold mb-1">Stay Updated</p>
+                  <p className="text-xs text-gray-600">Track your leaves and project assignments</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Stats Cards */}
-          {stats && (
+          {stats && user.role !== 'employee' && (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {/* Total Employees */}

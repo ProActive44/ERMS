@@ -37,8 +37,11 @@ const ProjectList: React.FC = () => {
 
   useEffect(() => {
     dispatch(fetchProjects(filters));
-    dispatch(fetchProjectStats());
-  }, [dispatch]);
+    // Only fetch stats for admin/HR
+    if (canManage) {
+      dispatch(fetchProjectStats());
+    }
+  }, [dispatch, canManage]);
 
   useEffect(() => {
     dispatch(fetchProjects(filters));
@@ -99,8 +102,12 @@ const ProjectList: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Projects</h1>
-          <p className="text-sm text-gray-600">Manage and track all projects</p>
+          <h1 className="text-2xl font-bold text-gray-800">
+            {canManage ? 'Projects' : 'My Projects'}
+          </h1>
+          <p className="text-sm text-gray-600">
+            {canManage ? 'Manage and track all projects' : 'View and track your assigned projects'}
+          </p>
         </div>
         {canManage && (
           <button
@@ -113,8 +120,8 @@ const ProjectList: React.FC = () => {
         )}
       </div>
 
-      {/* Stats Cards */}
-      {stats && (
+      {/* Stats Cards - Hidden for employees */}
+      {stats && canManage && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-white p-4 rounded-lg shadow">
             <div className="flex items-center justify-between">
@@ -291,7 +298,7 @@ const ProjectList: React.FC = () => {
           <p className="text-gray-600 mb-4">
             {canManage
               ? 'Get started by creating your first project'
-              : 'No projects available at the moment'}
+              : 'You are not assigned to any projects yet'}
           </p>
           {canManage && (
             <button

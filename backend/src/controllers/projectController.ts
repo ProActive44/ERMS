@@ -95,6 +95,30 @@ export const getAllProjects = async (req: AuthenticatedRequest, res: Response): 
 
     const filter: any = {};
 
+    // For regular employees, only show projects they're assigned to
+    const userRole = req.user?.role;
+    if (userRole === 'employee') {
+      const employee = await Employee.findOne({ userId: req.user?.userId });
+      if (employee) {
+        filter.$or = [
+          { projectManager: employee._id },
+          { teamMembers: employee._id }
+        ];
+      } else {
+        // No employee record, return empty
+        return res.json({
+          success: true,
+          data: [],
+          pagination: {
+            total: 0,
+            page: Number(page),
+            limit: Number(limit),
+            totalPages: 0,
+          },
+        });
+      }
+    }
+
     if (status) filter.status = status;
     if (priority) filter.priority = priority;
     if (projectManagerId) filter.projectManager = projectManagerId;
@@ -398,14 +422,44 @@ export const updateProjectProgress = async (req: AuthenticatedRequest, res: Resp
 };
 
 // Get Project Statistics
-export const getProjectStats = async (_req: AuthenticatedRequest, res: Response): Promise<any> => {
+export const getProjectStats = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
   try {
-    const totalProjects = await Project.countDocuments();
-    const activeProjects = await Project.countDocuments({ status: 'In Progress' });
-    const completedProjects = await Project.countDocuments({ status: 'Completed' });
-    const onHoldProjects = await Project.countDocuments({ status: 'On Hold' });
+    const filter: any = {};
+    
+    // For regular employees, only count their assigned projects
+    const userRole = req.user?.role;
+    if (userRole === 'employee') {
+      const employee = await Employee.findOne({ userId: req.user?.userId });
+      if (employee) {
+        filter.$or = [
+          { projectManager: employee._id },
+          { teamMembers: employee._id }
+        ];
+      } else {
+        // No employee record, return zeros
+        return res.json({
+          success: true,
+          data: {
+            totalProjects: 0,
+            activeProjects: 0,
+            completedProjects: 0,
+            onHoldProjects: 0,
+            projectsByStatus: [],
+            projectsByPriority: [],
+          },
+        });
+      }
+    }
+
+    const totalProjects = await Project.countDocuments(filter);
+    const activeProjects = await Project.countDocuments({ ...filter, status: 'In Progress' });
+    const completedProjects = await Project.countDocuments({ ...filter, status: 'Completed' });
+    const onHoldProjects = await Project.countDocuments({ ...filter, status: 'On Hold' });
+
+    const matchStage = Object.keys(filter).length > 0 ? { $match: filter } : { $match: {} };
 
     const projectsByStatus = await Project.aggregate([
+      matchStage,
       {
         $group: {
           _id: '$status',
@@ -415,6 +469,7 @@ export const getProjectStats = async (_req: AuthenticatedRequest, res: Response)
     ]);
 
     const projectsByPriority = await Project.aggregate([
+      matchStage,
       {
         $group: {
           _id: '$priority',
