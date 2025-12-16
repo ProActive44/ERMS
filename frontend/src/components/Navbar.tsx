@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
 import { logoutUser } from '../store/authSlice';
@@ -12,6 +13,7 @@ const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = React.useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = React.useState(false);
   const profileMenuRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -33,6 +35,11 @@ const Navbar: React.FC = () => {
   }, []);
 
   const handleLogout = async () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const confirmLogout = async () => {
+    setShowLogoutConfirm(false);
     await dispatch(logoutUser());
     navigate('/login');
   };
@@ -52,6 +59,7 @@ const Navbar: React.FC = () => {
   ];
 
   return (
+    <>
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b ${
       scrolled 
         ? 'bg-white/95 backdrop-blur-xl shadow-lg border-gray-200/50' 
@@ -247,6 +255,38 @@ const Navbar: React.FC = () => {
         </div>
       )}
     </nav>
+    {/* Logout Confirmation Modal - Rendered at document body level */}
+    {showLogoutConfirm && createPortal(
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-scale-in">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center">
+              <LogOut size={24} className="text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-gray-900">Confirm Logout</h3>
+              <p className="text-sm text-gray-600">Are you sure you want to logout?</p>
+            </div>
+          </div>
+          <div className="flex gap-3 mt-6">
+            <button
+              onClick={() => setShowLogoutConfirm(false)}
+              className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl font-semibold text-gray-700 hover:bg-gray-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmLogout}
+              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-600 to-pink-600 rounded-xl font-semibold text-white hover:from-red-700 hover:to-pink-700 shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>,
+      document.body
+    )}
+    </>
   );
 };
 
