@@ -15,7 +15,9 @@ const AppContent: React.FC = () => {
   return (
     <div className="App min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {!isAuthPage && <Navbar />}
-      <AppRoutes />
+      <div className={!isAuthPage ? 'pt-16' : ''}>
+        <AppRoutes />
+      </div>
       <ToastContainer 
         position="top-right" 
         autoClose={3000}
