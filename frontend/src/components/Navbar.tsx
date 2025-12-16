@@ -27,6 +27,7 @@ const Navbar: React.FC = () => {
     { path: '/leaves', label: 'Leaves', icon: FileText },
     { path: '/projects', label: 'Projects', icon: FolderKanban },
     { path: '/tasks', label: 'Tasks', icon: FolderKanban },
+    { path: '/reports', label: 'Reports', icon: FileText },
   ];
 
   return (

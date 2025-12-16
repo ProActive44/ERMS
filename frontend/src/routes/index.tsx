@@ -7,6 +7,7 @@ import AttendanceRoutes from './AttendanceRoutes';
 import LeaveRoutes from './LeaveRoutes';
 import ProjectRoutes from './ProjectRoutes';
 import TaskRoutes from './TaskRoutes';
+import ReportRoutes from './ReportRoutes';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -19,6 +20,7 @@ const AppRoutes: React.FC = () => {
       {LeaveRoutes()}
       {ProjectRoutes()}
       {TaskRoutes()}
+      {ReportRoutes()}
     </Routes>
   );
 };
