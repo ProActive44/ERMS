@@ -26,10 +26,13 @@ This project was developed as part of the **Master of Computer Applications (MCA
 ---
 
 ## Project Structure
+
+```
 ERMS/
 ├── backend/    # Node.js / Express backend
 ├── frontend/   # React.js frontend
 └── README.md
+```
 
 ---
 
