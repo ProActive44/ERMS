@@ -77,9 +77,12 @@ The following credentials are provided **strictly for academic evaluation and de
 ## Local Setup (Optional)
 
 ### Prerequisites
+
 - Node.js (v18 or above)
 - MongoDB (local or MongoDB Atlas)
 - npm or yarn
+
+> **Important:** You must run `npm install` in both the backend and frontend directories before starting the project locally. This step is required for the application to work.
 
 ### Backend Setup
 ```bash
